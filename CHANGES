@@ -1,0 +1,126 @@
+3.6
+06/01/2011
+Added ability to read BAM files using the -F flag, dependent on samtools (http://samtools.sf.net)
+      being in the system search path. BAM files cannot be gzipped and must be sorted.
+
+3.5
+23/09/2009
+Added -V option, for peaks to be extended only as far as evidence permits. Fixes issue of peaks 
+      being extended beyond chromosome edges. Only has effect if the fragment extension parameter, 
+      -f, is set.
+Fixed bug which could ignore the final read in a chromosome.
+Fragment extension is ignored when using paired reads (-e) option.
+Fixed bug in peak ends when using a bed file with different read lengths, the -e paired parameter,
+      no fragment extension and the read with the highest(/lowest) start position does not not have 
+      the highest end position. 
+       
+
+3.4
+25/08/2009
+Fixed bug which was printing a nonsensical line if no peaks were found.
+Fixed typo in help page, -j was mislabelled -k.
+Added option -A to append output file(s) instead of overwriting.
+Fixed off-by-one error in overlap files. NB: All start and end coordinates are considered as closed
+      intervals.
+Added bootstrap option -T, which bootstraps reads from sample (-i) and optional reference (input)
+      (-r). The approximate number of reads chosen can be specified the -N and -K parameters
+      respectively. To bootstrap the input, specify the reference file for both -i and -r, with -N
+      representing the number of reads passing quality filtering in the original sample file,
+      keeping other parameter settings the same.
+Added random seed option -D [int] for seeding random number generator for sampling and bootstrapping.  
+Input and reference files can now contain lines in the header beginning with either "#" or "@".
+
+3.3
+17/08/2009
+SAM format files can now be used using the -S filetype parameter.
+New option (-g) added which will calculate overlaps between two files. Files must have chromosome
+      in the first field, start position in the second and end position in the third field, and the
+      files must be tab-separated and sorted similarly.
+Fixed bug in calculating nearest feature for the nearest peak to the (-a) comparison file, under the 
+      -O option. Some regions were being skipped.
+Fixed segmentation fault bug when using the (-u) subsetting parameter with BED file format.   
+
+3.2
+28/05/2009
+When using the -R parameter for sample and reference data, the penalty function -x was unaffected
+      by the number of reference reads, potentially causing biases for reference data sets of 
+      differing sizes. Now, SWEMBL will additional count the number of reference passing the
+      quality filter (unless the new reference count parameter -K is specified). The reference 
+      penalty specified by -x (by default 1) will then be multiplied by 
+	(number of sample reads) / (number of reference reads) , 
+      and hence will represent the enrichment required in the the sample over the reference data.
+SWEMBL was occassionally suffering a segmentation fault when using a reference (input) sample, the
+      relative background parameter -R and a reference penalty (-x) less than one. This was due to
+      the fact that the default thresholding for both sample and reference reads starting at any 
+      one position (in the genome) was five. This lead in regions of high read coverage, the
+      SWEMBL score was increasing, while the summit height was decreasing, causing some peaks to 
+      have only negative heights. 
+      The default thresholding for reference samples has been changed to the 
+        (value of -t) * (value of -x)
+      so that in regions of high read coverage, the SWEMBL score will decrease as if no reads were
+      observed. A new parameter (-j) has been added for the threshold for reference reads, which
+      will override the default behaviour.    
+Fixed bug and memory leak in list handling in calculating summits using paired-end data. This was 
+      causing some summits to be shifted.
+When calculating overlaps, the output is directed into the output (-o) file instead of standard 
+      output. Using the -O overlap feature was failing to create files if the output file was 
+      specified in a different directory. This has been corrected.
+Implemented a "paired" method for countfile format (-C). Using -e will use the start and end
+      coordinates, not the start extended by the fragment length (by default first sequence length).
+A new option (-y) has been added to run in quiet mode, only printing warnings to the screen.
+The installation procedure has been simplified by the inclusion of a makefile. In Unix-like systems
+      typing make should compile SWEMBL. Code optimisation has now been enabled by default, 
+      resulting in an approximate 25% reduction in run time. If this causes problems, rerun make
+      without the -O option.
+
+3.1
+10/02/2009
+Rewriting and simplification of the code for reference (i.e. input) reads. This has removed the
+      need for the specification of the maximum number of saved reference chromosomes and hence 
+      the previous -k parameter has been withdrawn.
+Also, chromosomes for sample and reference files NEED not be in identical order, although not
+      following this recommendation will lead to penalties in time and memory. Also, chromosomes
+      with a small number of (input) reads should be at the end of the file, as when SWEMBL finds
+      different sample and reference chromosomes, it will store all input reads in memory until it
+      finds the sample chromosome or reaches the end of the reference file. 
+Fixed bug in input read handling - may lead to slightly different results when using input reads.
+
+3.0
+06/02/2009
+New feature -  the summit of the peak, as defined as the median of all positions in a peak with 
+      the maximum coverage depth, is now returned with the maximum coverage depth. Thresholds
+      are not considered.
+Unified headers for both with and without reference reads (-r).
+Added print version option (-v).
+
+2.12
+13/01/2009
+Converted wiggle track creation from integer to real numbered values, fixed bug in handling
+      of negative strand reads in wiggle track and fragment extension. 
+
+2.11
+12/01/2009
+SWEMBL will count the number of reads in the sample (excluding those filtered out when using
+      MAQ and either quality filtering or paired ends [where flag must equal 18 and only 
+      positive strand reads kept]), unless the parameter -N is specified with the number of 
+      reads.
+
+2.10 
+09/01/2009
+Added subsampling option -u (0 < u <= 1) for the proportion of lines read randomly.
+      Reference penalty is multiplied by u value.
+      -N must be supplied.
+      If -R is used, parameters are used as if N was multiplied by u.
+Reverted to old unthresholded score while using new thesholded score to calculate peaks.
+Fixed bug in reference read handling.
+Changed -m mininum read count filter from (Number of sample reads - Number of reference
+      reads) to (Number of sample reads - Number of reference reads * Reference read penalty)
+Changed unique count from union of sample and reference reads to solely sample reads.
+Fixed bug in dynamic array handling.
+Reverted to outputting counts as integers except if -C (countfile) is used [Change from 2.9].
+
+2.9 
+06/01/2009
+Changed count file so that double (not just integer) input is accepted.
+Counts are now double not integers.
+Fixed bug in sorting paired end reads. 

@@ -1,0 +1,5 @@
+SWEMBL - a fast, memory-efficient peak-calling tool package for functional genomic and other data sets.
+
+To install, unpack files and type  make .
+
+Documentation and updates are available at http://www.ebi.ac.uk/~swilder/SWEMBL .
