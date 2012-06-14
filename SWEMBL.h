@@ -30,7 +30,7 @@ struct countend
 struct readinfo
 {
   char chr[50], prevchr[50];
-  long int pos, prevpos, negpos;
+  long int pos, prevpos, nextpos;
   char strand[2];
   int qual, pairlength, pairflag, changechr;
   double count, pvecount, negcount, refcount;

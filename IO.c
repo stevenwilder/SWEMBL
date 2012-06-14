@@ -561,12 +561,48 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				  { 
 				    strcpy((*read).strand,"+"); 
 				  }
-				//printf("%s\n", (*read).strand);
-				(*read).qual=((int)((int)atoi(split) & (int)4)) ? -1 : 0; 
+				//printf("%s\n", (*read).strand); 780 = 4+8+256+512
+				(*read).qual=((int)((int)atoi(split) & (int)780)) ? -1 : 0;
+				(*read).pairflag = ((int)((int)atoi(split) & (int)3)) ? 18 : 0;
 				break;
 			      }   
 			    case(2): {strcpy((*read).chr,split); break;}
 			    case(3): {(*read).pos = atoi(split); break;}
+			    case(4): {(*read).qual = atoi(split); break;}
+			    case(6): 
+			      { 
+				if(strcmp(split,"*") && strcmp(split,"="))
+				  {
+				    (*read).pairflag = 0;
+				  }
+			      }
+			    case(7):
+			      {
+				(*read).nextpos = atoi(split);
+				if((*read).nextpos == 0)
+				  { 
+				    (*read).pairflag = 0; 
+				  }
+			      }
+			    case(8):
+			      {
+				(*read).pairlength = atoi(split);
+				if((*read).pairlength <0)
+				  {
+				    (*read).pairflag = 0;
+				  }
+				else
+				  {
+				    if(paired && ((*read).nextpos-(*read).pos) >= (*read).pairlength)
+				      {
+					(*read).pairflag = 0;
+				      }
+				  }
+			      }
+			    }
+			  if(!strcmp((*read).chr,"*") || (*read).pos == 0)
+			    {
+			      (*read).qual = -1;
 			    }
 			}
 		    }
@@ -702,7 +738,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				{
 				case(1): 
 				  {
-				    if((int)((int)atoi(nls) & (int)16))
+				    if((int)((int)atoi(split) & (int)16))
 				      { 
 					strcpy(nlread.strand,"-");     
 				      }
@@ -710,12 +746,48 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				      { 
 					strcpy(nlread.strand,"+"); 
 				      }
-				    //printf("%s\n", nlread.strand);
-					nlread.qual=((int)((int)atoi(nls) & (int)4)) ? -1 : 0;
+				    //printf("%s\n", nlread.strand); 780 = 4+8+256+512
+				    nlread.qual=((int)((int)atoi(split) & (int)780)) ? -1 : 0;
+				    nlread.pairflag = ((int)((int)atoi(split) & (int)3)) ? 18 : 0;
 				    break;
 				  }   
-				case(2): {strcpy(nlread.chr,nls); break;}
-				case(3): {nlread.pos = atoi(nls); break;}
+				case(2): {strcpy(nlread.chr,split); break;}
+				case(3): {nlread.pos = atoi(split); break;}
+				case(4): {nlread.qual = atoi(split); break;}
+				case(6): 
+				  { 
+				    if(strcmp(split,"*") && strcmp(split,"="))
+				      {
+					nlread.pairflag = 0;
+				      }
+				  }
+				case(7):
+				  {
+				    nlread.nextpos = atoi(split);
+				    if(nlread.nextpos == 0)
+				      { 
+					nlread.pairflag = 0; 
+				      }
+				  }
+				case(8):
+				  {
+				    nlread.pairlength = atoi(split);
+				    if(nlread.pairlength <0)
+				      {
+					nlread.pairflag = 0;
+				      }
+				    else
+				      {
+					if(paired && (nlread.nextpos-nlread.pos) >= nlread.pairlength)
+					  {
+					    nlread.pairflag = 0;
+					  }
+				      }
+				  }
+				}
+			      if(!strcmp(nlread.chr,"*") || nlread.pos == 0)
+				{
+				  nlread.qual = -1;
 				}
 			    }
 			}
