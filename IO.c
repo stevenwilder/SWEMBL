@@ -89,7 +89,7 @@ struct param get_parameters(char infile[1000], char outfile[1000], char reffile[
      case 'g': par.overlapmode = 1; break;
      case 'T': par.bootstrap = 1; break;
      case 'D': rseed = atoi(optarg); break;
-     case 'v': printf("SWEMBL version 3.5\n"); exit (0);
+     case 'v': printf("SWEMBL version 3.6\n"); exit (0);
      case 'h': print_help();
      case '?': 
        if (optopt == 'i')
@@ -116,7 +116,7 @@ struct param get_parameters(char infile[1000], char outfile[1000], char reffile[
  if(!strcmp(outfile,""))
     {
       strcpy(outfile,infile);
-      strcat(outfile, ".SWEMBL.3.5.txt");
+      strcat(outfile, ".SWEMBL.3.6.txt");
     }
 
  if(strcmp(reffile,""))
@@ -137,7 +137,7 @@ struct param get_parameters(char infile[1000], char outfile[1000], char reffile[
 
  if(!strcmp(filetype,""))
    {
-     par.overlapmode ? strcpy(filetype,"B") : strcpy(filetype,"M");
+     par.overlapmode ? strcpy(filetype,"B") : strcpy(filetype,"F");
    }
 
  if(zip && !strcmp(filetype,"F"))
@@ -389,9 +389,9 @@ struct param get_firstline(int *endfile, char *nextline, struct param par)
 	}
     }   
 
-  if(!strcmp(filetype,"S"))  //ignore SAM lines at beginning of file starting with '@'
-    {
-      par.paired = 1;
+  //if(!strcmp(filetype,"S"))  //ignore SAM lines at beginning of file starting with '@'
+    //{
+      //par.paired = 1;
       //if(par.seqlength == 0)
       //{
       //	  strcpy(seqline,nextline);
@@ -407,10 +407,15 @@ struct param get_firstline(int *endfile, char *nextline, struct param par)
       //      result = strtok( NULL, "\t" );
       //    }
       //}
-    }
+  //}
 
   if(par.fraglength == 0 || par.paired) { par.fraglength = par.seqlength; }
   //if(par.fraglength == 0 && !par.paired) { par.fraglength = par.seqlength; }
+
+  if(!strcmp(filetype,"S"))  //ignore SAM lines at beginning of file starting with '@'
+    {
+      par.paired = 1;
+    }
 
   if(par.ref)
     {
