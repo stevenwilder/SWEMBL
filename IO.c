@@ -391,21 +391,22 @@ struct param get_firstline(int *endfile, char *nextline, struct param par)
 
   if(!strcmp(filetype,"S"))  //ignore SAM lines at beginning of file starting with '@'
     {
-      if(par.seqlength == 0)
-	{
-	  strcpy(seqline,nextline);
-	  char *result = NULL;
-	  result = strtok( seqline, "\t" );
-	  int i = 0;
-
-	  while( result != NULL)
-	    { 
-	      if(i == 9) { par.seqlength = strlen(result); }
-	      if(!par.pen_inc) {par.pen_inc = par.seqlength;}
-	      i++;
-	      result = strtok( NULL, "\t" );
-	    }
-	}
+      par.paired = 1;
+      //if(par.seqlength == 0)
+      //{
+      //	  strcpy(seqline,nextline);
+      //	  char *result = NULL;
+      //  result = strtok( seqline, "\t" );
+      //  int i = 0;
+      //
+      //  while( result != NULL)
+      //    { 
+      //      if(i == 9) { par.seqlength = strlen(result); }
+      //      if(!par.pen_inc) {par.pen_inc = par.seqlength;}
+      //      i++;
+      //      result = strtok( NULL, "\t" );
+      //    }
+      //}
     }
 
   if(par.fraglength == 0 || par.paired) { par.fraglength = par.seqlength; }
@@ -563,7 +564,12 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				  }
 				//printf("%s\n", (*read).strand); 780 = 4+8+256+512
 				(*read).qual=((int)((int)atoi(split) & (int)780)) ? -1 : 0;
-				(*read).pairflag = ((int)((int)atoi(split) & (int)3)) ? 18 : 0;
+				switch((int)((int)atoi(split) & (int)3))
+				  {
+				  case(3): { (*read).pairflag = 18; break;}
+				  case(1): { (*read).pairflag = 0; break;}
+				  default: { (*read).pairflag = -1; break;}
+				  }
 				break;
 			      }   
 			    case(2): {strcpy((*read).chr,split); break;}
@@ -571,7 +577,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 			    case(4): {(*read).qual = atoi(split); break;}
 			    case(6): 
 			      { 
-				if(strcmp(split,"*") && strcmp(split,"="))
+				if((*read).pairflag == 18 && strcmp(split,"*") && strcmp(split,"="))
 				  {
 				    (*read).pairflag = 0;
 				  }
@@ -579,7 +585,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 			    case(7):
 			      {
 				(*read).nextpos = atoi(split);
-				if((*read).nextpos == 0)
+				if((*read).pairflag == 18 && (*read).nextpos == 0)
 				  { 
 				    (*read).pairflag = 0; 
 				  }
@@ -587,16 +593,23 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 			    case(8):
 			      {
 				(*read).pairlength = atoi(split);
-				if((*read).pairlength <0)
+				if((*read).pairflag == 18 && (*read).pairlength <0)
 				  {
 				    (*read).pairflag = 0;
 				  }
 				else
 				  {
-				    if(paired && ((*read).nextpos-(*read).pos) >= (*read).pairlength)
+				    if((*read).pairflag == 18 && ((*read).nextpos-(*read).pos) >= (*read).pairlength)
 				      {
 					(*read).pairflag = 0;
 				      }
+				  }
+			      }
+			    case(9):
+			      {
+				if((*read).pairflag != 18)
+				  {
+				    (*read).pairlength = strlen(split);
 				  }
 			      }
 			    }
@@ -647,7 +660,9 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 	  if(!paired) { (*read).negcount += separate(nlread.strand, fraglength, nlread.pos, bootstrap); }
 	  //else{ if(nlread.pairflag  == 18) { (*read).negcount += separate(nlread.strand, nlread.pairlength, nlread.pos); }}
 	  else{ 
-	    if(nlread.pairflag  == 18) { 
+	    if(nlread.pairflag == -1) {
+	      (*read).negcount += separate(nlread.strand, (fraglength > nlread.pairlength) ? fraglength : nlread.pairlength, nlread.pos, bootstrap); }
+	    if(nlread.pairflag == 18) { 
 	      separate(nlread.strand, nlread.pairlength, nlread.pos, bootstrap); } }
 	      //if(fraglength){ separate(nlread.strand, fraglength, nlread.pos, bootstrap); }
 	      //else { separate(nlread.strand, nlread.pairlength, nlread.pos, bootstrap); } } }
@@ -672,7 +687,10 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 	      if(nlread.qual >= qualcutoff)
 		{
 		  if(!paired) { (*read).negcount += separate(nlread.strand, fraglength, nlread.pos, bootstrap); }
-		  else{ if(nlread.pairflag  == 18) { separate(nlread.strand, nlread.pairlength, nlread.pos, bootstrap); } }
+		  else{
+		    if(nlread.pairflag == -1) {
+		      (*read).negcount += separate(nlread.strand, (fraglength > nlread.pairlength) ? fraglength : nlread.pairlength, nlread.pos, bootstrap); }
+		    if(nlread.pairflag  == 18) { separate(nlread.strand, nlread.pairlength, nlread.pos, bootstrap); } }
 		  // ***If paired ignore negative strand reads (except for count file format)***
 		}
 	    }
@@ -736,6 +754,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 			    {
 			      switch(j)
 				{
+				
 				case(1): 
 				  {
 				    if((int)((int)atoi(split) & (int)16))
@@ -748,7 +767,12 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				      }
 				    //printf("%s\n", nlread.strand); 780 = 4+8+256+512
 				    nlread.qual=((int)((int)atoi(split) & (int)780)) ? -1 : 0;
-				    nlread.pairflag = ((int)((int)atoi(split) & (int)3)) ? 18 : 0;
+				    switch((int)((int)atoi(split) & (int)3))
+				      {
+				      case(3): { nlread.pairflag = 18; break;}
+				      case(1): { nlread.pairflag = 0; break;}
+				      default: { nlread.pairflag = -1; break;}
+				      }
 				    break;
 				  }   
 				case(2): {strcpy(nlread.chr,split); break;}
@@ -756,7 +780,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				case(4): {nlread.qual = atoi(split); break;}
 				case(6): 
 				  { 
-				    if(strcmp(split,"*") && strcmp(split,"="))
+				    if(nlread.pairflag == 18 && strcmp(split,"*") && strcmp(split,"="))
 				      {
 					nlread.pairflag = 0;
 				      }
@@ -764,7 +788,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				case(7):
 				  {
 				    nlread.nextpos = atoi(split);
-				    if(nlread.nextpos == 0)
+				    if(nlread.pairflag == 18 && nlread.nextpos == 0)
 				      { 
 					nlread.pairflag = 0; 
 				      }
@@ -772,16 +796,23 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				case(8):
 				  {
 				    nlread.pairlength = atoi(split);
-				    if(nlread.pairlength <0)
+				    if(nlread.pairflag == 18 && nlread.pairlength <0)
 				      {
 					nlread.pairflag = 0;
 				      }
 				    else
 				      {
-					if(paired && (nlread.nextpos-nlread.pos) >= nlread.pairlength)
+					if(nlread.pairflag == 18 && (nlread.nextpos-nlread.pos) >= nlread.pairlength)
 					  {
 					    nlread.pairflag = 0;
 					  }
+				      }
+				  }
+				case(9):
+				  {
+				    if(nlread.pairflag != 18)
+				      {
+					nlread.pairlength = strlen(split);
 				      }
 				  }
 				}
