@@ -1135,7 +1135,7 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 				{
 				case(1): 
 				  {
-				    if((int)((int)atoi(split) & (int)16))
+				    if((int)((int)atoi(refsplit) & (int)16))
 				      { 
 					strcpy((*refread).strand,"-");     
 				      }
@@ -1144,8 +1144,8 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 					strcpy((*refread).strand,"+"); 
 				      }
 				    //printf("%s\n", (*refread).strand); 780 = 4+8+256+512
-				    (*refread).qual=((int)((int)atoi(split) & (int)780)) ? -1 : 0;
-				    switch((int)((int)atoi(split) & (int)3))
+				    (*refread).qual=((int)((int)atoi(refsplit) & (int)780)) ? -1 : 0;
+				    switch((int)((int)atoi(refsplit) & (int)3))
 				      {
 				      case(3): { (*refread).pairflag = 18; break;}
 				      case(1): { (*refread).pairflag = 0; break;}
@@ -1153,19 +1153,19 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 				      }
 				    break;
 				  }   
-				case(2): {strcpy((*refread).chr,split); break;}
-				case(3): {(*refread).pos = atoi(split); break;}
-				case(4): {(*refread).qual = atoi(split); break;}
+				case(2): {strcpy((*refread).chr,refsplit); break;}
+				case(3): {(*refread).pos = atoi(refsplit); break;}
+				case(4): {(*refread).qual = atoi(refsplit); break;}
 				case(6): 
 				  { 
-				    if((*refread).pairflag == 18 && strcmp(split,"*") && strcmp(split,"="))
+				    if((*refread).pairflag == 18 && strcmp(refsplit,"*") && strcmp(refsplit,"="))
 				      {
 					(*refread).pairflag = 0;
 				      }
 				  }
 				case(7):
 				  {
-				    (*refread).nextpos = atoi(split);
+				    (*refread).nextpos = atoi(refsplit);
 				    if((*refread).pairflag == 18 && (*refread).nextpos == 0)
 				      { 
 					(*refread).pairflag = 0; 
@@ -1173,7 +1173,7 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 				  }
 				case(8):
 				  {
-				    (*refread).pairlength = atoi(split);
+				    (*refread).pairlength = atoi(refsplit);
 				    if((*refread).pairflag == 18 && (*refread).pairlength <0)
 				      {
 					(*refread).pairflag = 0;
@@ -1190,7 +1190,7 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 				  {
 				    if((*refread).pairflag != 18)
 				      {
-					(*refread).pairlength = strlen(split);
+					(*refread).pairlength = strlen(refsplit);
 				      }
 				  }
 				}
