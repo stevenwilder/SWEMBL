@@ -210,7 +210,7 @@ struct param get_parameters(char infile[1000], char outfile[1000], char reffile[
 
 void print_help()
 {
-  printf("\nProgram to call peaks from genomic and other data.\n\nMandatory command line options:\n-i Path to input file\n\nOptional command line options taking no arguments:\n-e Paired end reads\n-V New peak version, extending peaks only as far as evidence permits\n-M MAQ format [default]\n-B BED format\n-E ELAND format\n-S SAM format\n-F BAM format\n-C count format\n-z File is gzipped\n-O Create files of nearest features with comparison file (-a)\n-g Overlap mode for two bed files\n-T Bootstrap input\n-y Quiet mode, only print warnings\n-A Append output file\n-v Print version number and exit\n-h This help page\n\nOptional command line options taking arguments [defaults in square brackets]:\n-o Path to output file [Input file.'.SWEMBL.3.5.txt']\n-r Path to reference (Input) file\n-w Path to wiggle track file\n-a Path to comparison file\n-s Path to coordinate file\n-G Number of rows in coordinate file [200]\n-b Penalty applied to read count [0]\n-p Penalty applied to a gap of one base pair [0.01]\n-l Read length [calculated from first read in file for BED and MAQ formats]\n-f Fragment length for extending fragments [Read length]\n-d Gap at which penalty per base pair increases [70]\n-P Penalty per base pair applied after gap specifed above [0.02]\n-t Threshold value for number of sample reads starting at one base pair [5]\n-j Threshold value for number of reference reads starting at one base pair [0 = -t value]\n-q Mapping quality filter value (MAQ only) [0]\n-m Minimum read count in a peak [8]\n-c Minimum score for a peak [0]\n-n Maximum score threshold [0 = infinite]\n-N Number of input reads [0]\n-R Relative background (depends on -N) [0]\n-K Number of reference reads [0]\n-x Penalty factor for reference reads [1]\n-u Proportion of reads sampled [1]\n-D Random seed (only used for sampling and bootstrapping) [time]\n\n"); exit(1);
+  printf("\nProgram to call peaks from genomic and other data.\n\nMandatory command line options:\n-i Path to input file\n\nOptional command line options taking no arguments:\n-e Paired end reads\n-V New peak version, extending peaks only as far as evidence permits\n-M MAQ format [default]\n-B BED format\n-E ELAND format\n-S SAM format\n-F BAM format\n-C count format\n-z File is gzipped\n-O Create files of nearest features with comparison file (-a)\n-g Overlap mode for two bed files\n-T Bootstrap input\n-y Quiet mode, only print warnings\n-A Append output file\n-v Print version number and exit\n-h This help page\n\nOptional command line options taking arguments [defaults in square brackets]:\n-o Path to output file [Input file.'.SWEMBL.3.6.txt']\n-r Path to reference (Input) file\n-w Path to wiggle track file\n-a Path to comparison file\n-s Path to coordinate file\n-G Number of rows in coordinate file [200]\n-b Penalty applied to read count [0]\n-p Penalty applied to a gap of one base pair [0.01]\n-l Read length [calculated from first read in file for BED and MAQ formats]\n-f Fragment length for extending fragments [Read length]\n-d Gap at which penalty per base pair increases [70]\n-P Penalty per base pair applied after gap specifed above [0.02]\n-t Threshold value for number of sample reads starting at one base pair [5]\n-j Threshold value for number of reference reads starting at one base pair [0 = -t value]\n-q Mapping quality filter value (MAQ only) [0]\n-m Minimum read count in a peak [8]\n-c Minimum score for a peak [0]\n-n Maximum score threshold [0 = infinite]\n-N Number of input reads [0]\n-R Relative background (depends on -N) [0]\n-K Number of reference reads [0]\n-x Penalty factor for reference reads [1]\n-u Proportion of reads sampled [1]\n-D Random seed (only used for sampling and bootstrapping) [time]\n\n"); exit(1);
 }
 
 
@@ -1135,7 +1135,7 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 				{
 				case(1): 
 				  {
-				    if((int)((int)atoi(refsplit) & (int)16))
+				    if((int)((int)atoi(split) & (int)16))
 				      { 
 					strcpy((*refread).strand,"-");     
 				      }
@@ -1143,11 +1143,60 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 				      { 
 					strcpy((*refread).strand,"+"); 
 				      }
-				    //printf("%s\n", (*refread).strand);
+				    //printf("%s\n", (*refread).strand); 780 = 4+8+256+512
+				    (*refread).qual=((int)((int)atoi(split) & (int)780)) ? -1 : 0;
+				    switch((int)((int)atoi(split) & (int)3))
+				      {
+				      case(3): { (*refread).pairflag = 18; break;}
+				      case(1): { (*refread).pairflag = 0; break;}
+				      default: { (*refread).pairflag = -1; break;}
+				      }
 				    break;
 				  }   
-				case(2): {strcpy((*refread).chr,refsplit); break;}
-				case(3): {(*refread).pos = atoi(refsplit); break;}
+				case(2): {strcpy((*refread).chr,split); break;}
+				case(3): {(*refread).pos = atoi(split); break;}
+				case(4): {(*refread).qual = atoi(split); break;}
+				case(6): 
+				  { 
+				    if((*refread).pairflag == 18 && strcmp(split,"*") && strcmp(split,"="))
+				      {
+					(*refread).pairflag = 0;
+				      }
+				  }
+				case(7):
+				  {
+				    (*refread).nextpos = atoi(split);
+				    if((*refread).pairflag == 18 && (*refread).nextpos == 0)
+				      { 
+					(*refread).pairflag = 0; 
+				      }
+				  }
+				case(8):
+				  {
+				    (*refread).pairlength = atoi(split);
+				    if((*refread).pairflag == 18 && (*refread).pairlength <0)
+				      {
+					(*refread).pairflag = 0;
+				      }
+				    else
+				      {
+					if((*refread).pairflag == 18 && ((*refread).nextpos-(*refread).pos) >= (*refread).pairlength)
+					  {
+					    (*refread).pairflag = 0;
+					  }
+				      }
+				  }
+				case(9):
+				  {
+				    if((*refread).pairflag != 18)
+				      {
+					(*refread).pairlength = strlen(split);
+				      }
+				  }
+				}
+			      if(!strcmp((*refread).chr,"*") || (*refread).pos == 0)
+				{
+				  (*refread).qual = -1;
 				}
 			    }
 			}
