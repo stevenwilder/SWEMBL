@@ -579,13 +579,22 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 			      }   
 			    case(2): {strcpy((*read).chr,split); break;}
 			    case(3): {(*read).pos = atoi(split); break;}
-			    case(4): {(*read).qual = atoi(split); break;}
+			    case(4): 
+			      {
+				(*read).qual = atoi(split); 				
+				if(!strcmp((*read).chr,"*") || (*read).pos == 0)
+				  {
+				    (*read).qual = -1;
+				  }
+				break;
+			      }
 			    case(6): 
 			      { 
 				if((*read).pairflag == 18 && strcmp(split,"*") && strcmp(split,"="))
 				  {
 				    (*read).pairflag = 0;
 				  }
+				break;
 			      }
 			    case(7):
 			      {
@@ -594,6 +603,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				  { 
 				    (*read).pairflag = 0; 
 				  }
+				break;
 			      }
 			    case(8):
 			      {
@@ -609,6 +619,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 					(*read).pairflag = 0;
 				      }
 				  }
+				break;
 			      }
 			    case(9):
 			      {
@@ -616,11 +627,8 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				  {
 				    (*read).pairlength = strlen(split);
 				  }
+				break;
 			      }
-			    }
-			  if(!strcmp((*read).chr,"*") || (*read).pos == 0)
-			    {
-			      (*read).qual = -1;
 			    }
 			}
 		    }
@@ -782,13 +790,22 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				  }   
 				case(2): {strcpy(nlread.chr,split); break;}
 				case(3): {nlread.pos = atoi(split); break;}
-				case(4): {nlread.qual = atoi(split); break;}
+				case(4): 
+				  {
+				    nlread.qual = atoi(split); 
+				    if(!strcmp(nlread.chr,"*") || nlread.pos == 0)
+				      {
+					nlread.qual = -1;
+				      }
+				    break;
+				  }
 				case(6): 
 				  { 
 				    if(nlread.pairflag == 18 && strcmp(split,"*") && strcmp(split,"="))
 				      {
 					nlread.pairflag = 0;
 				      }
+				    break;
 				  }
 				case(7):
 				  {
@@ -797,6 +814,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				      { 
 					nlread.pairflag = 0; 
 				      }
+				    break;
 				  }
 				case(8):
 				  {
@@ -812,6 +830,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 					    nlread.pairflag = 0;
 					  }
 				      }
+				    break;
 				  }
 				case(9):
 				  {
@@ -819,11 +838,8 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				      {
 					nlread.pairlength = strlen(split);
 				      }
+				    break;
 				  }
-				}
-			      if(!strcmp(nlread.chr,"*") || nlread.pos == 0)
-				{
-				  nlread.qual = -1;
 				}
 			    }
 			}
@@ -964,13 +980,15 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
 	  int i = 0;
 	  char *split = NULL;
 	  split = strtok( countline, "\t" );
+	    
 	  
-	  for(i=0;i <= endcol; i++)
+	  for(i=0;i <= 8; i++)
 	    {
 	      switch(i)
 		{
 		case(1): 
 		  {
+
 		    if((int)((int)atoi(split) & (int)16))
 		      { 
 			strcpy(countread.strand,"-");     
@@ -998,6 +1016,7 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
 		      {
 			countread.pairflag = 0;
 		      }
+		    break;
 		  }
 		case(7):
 		  {
@@ -1006,6 +1025,7 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
 		      { 
 			countread.pairflag = 0; 
 		      }
+		    break;
 		  }
 		case(8):
 		  {
@@ -1021,21 +1041,16 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
 			    countread.pairflag = 0;
 			  }
 		      }
-		  }
-		case(9):
-		  {
-		    if(countread.pairflag != 18)
-		      {
-			countread.pairlength = strlen(split);
-		      }
+		    break;
 		  }
 		}
-	      if(!strcmp(countread.chr,"*") || countread.pos == 0)
-		{
-		  countread.qual = -1;
-		}   
 	      split = strtok( NULL, "\t" );
 	    }
+	  
+	  if(!strcmp(countread.chr,"*") || countread.pos == 0)
+	    {
+	      countread.qual = -1;
+	    }   
 	  if(countread.pairflag != 0)
 	    {
 	      if(countread.qual >= (*par).qualcutoff)
@@ -1262,13 +1277,22 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 				  }   
 				case(2): {strcpy((*refread).chr,refsplit); break;}
 				case(3): {(*refread).pos = atoi(refsplit); break;}
-				case(4): {(*refread).qual = atoi(refsplit); break;}
+				case(4): 
+				  {
+				    (*refread).qual = atoi(refsplit);  
+				    if(!strcmp((*refread).chr,"*") || (*refread).pos == 0)
+				      {
+					(*refread).qual = -1;
+				      }
+				    break;
+				  }
 				case(6): 
 				  { 
 				    if((*refread).pairflag == 18 && strcmp(refsplit,"*") && strcmp(refsplit,"="))
 				      {
 					(*refread).pairflag = 0;
 				      }
+				    break;
 				  }
 				case(7):
 				  {
@@ -1277,6 +1301,7 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 				      { 
 					(*refread).pairflag = 0; 
 				      }
+				    break;
 				  }
 				case(8):
 				  {
@@ -1292,6 +1317,7 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 					    (*refread).pairflag = 0;
 					  }
 				      }
+				    break;
 				  }
 				case(9):
 				  {
@@ -1299,11 +1325,8 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 				      {
 					(*refread).pairlength = strlen(refsplit);
 				      }
+				    break;
 				  }
-				}
-			      if(!strcmp((*refread).chr,"*") || (*refread).pos == 0)
-				{
-				  (*refread).qual = -1;
 				}
 			    }
 			}
