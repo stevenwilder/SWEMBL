@@ -910,39 +910,121 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
   FILE *count_fp;
   char countline[1000];     
   long int nqreads = 0;
+  char *at = "@";
+  char atchar = *at;
+  
+  char *hash = "#";
+  char hashchar = *hash;
+	  
 
-  if(!strcmp(filetype,"F"))
+  //if(!strcmp(filetype,"F"))
+  //  {
+  //    char countcommand[1100] = "samtools flagstat ";
+  //    strcat(countcommand, infile);
+  //    strcat(countcommand, " | awk '{if(NR==1){print $1}}'");
+      
+  //    count_fp = popen(countcommand, "r");
+      
+  //    char countline[1000];
+  //    fgets(countline, 1000, count_fp);
+  //    char *nl;
+  //    nl = strchr(countline, '\n');
+  //    if(nl){*nl = '\0';}
+  //    
+  //    nqreads = atoi(countline);
+  //  }
+
+
+  if(zip)
+    { count_fp = gzopen(infile, "r"); }
+  else
+    { 
+      if(strcmp(filetype,"F"))
+	{
+	  count_fp = fopen(infile,"r"); 
+	}
+      else
+	{
+	  char samtoolscommand[1000] = "samtools view ";
+	  strcat(samtoolscommand, infile);
+	  count_fp = popen(samtoolscommand, "r");
+	}
+    }
+      
+
+     
+  if(!strcmp(filetype, "F") || !strcmp(filetype,"S"))
     {
-      char countcommand[1100] = "samtools flagstat ";
-      strcat(countcommand, infile);
-      strcat(countcommand, " | awk '{if(NR==1){print $1}}'");
-      
-      count_fp = popen(countcommand, "r");
-      
-      char countline[1000];
-      fgets(countline, 1000, count_fp);
-      char *nl;
-      nl = strchr(countline, '\n');
-      if(nl){*nl = '\0';}
-      
-      nqreads = atoi(countline);
+      while(egets (countline, 1000, count_fp) != NULL)
+	{ 
+	  int pairflag, qual = 0;
+	  long int nextpos, pos, fraglength;
+	  char countchar = *countline;
+	  if(countchar == atchar){ next; }
+	  
+	  int i = 0;
+	  char *split = NULL;
+	  split = strtok( countline, "\t" );
+	  
+	  for(i=0;i <= endcol; i++)
+	    {
+	      switch(i)
+		{
+		case(1): 
+		  {
+		    
+		    //printf("%s\n", (*read).strand); 780 = 4+8+256+512
+		    if((int)((int)atoi(split) & (int)780)) { qual = -1;}
+		    switch((int)((int)atoi(split) & (int)3))
+		      {
+		      case(3): { pairflag = 18; break;}
+		      case(1): { pairflag = 0; break;}
+		      default: { pairflag = -1; break;}
+		      }
+		    break;
+		  }  
+		case(3): {pos = atoi(split); break;}
+		case(4): {if(atoi(split) < (*par).qualcutoff) { qual = -1;} break;}
+		case(6): 
+		  { 
+		    if(pairflag == 18 && strcmp(split,"*") && strcmp(split,"="))
+		      {
+			qual = -1;
+		      }
+		  }
+		case(7):
+		  {
+		    nextpos = atoi(split);
+		    if(pairflag == 18 && nextpos == 0)
+		      { 
+			qual = -1; 
+		      }
+		  }
+		case(8):
+		  {
+		    pairlength = atoi(split);
+		    if(pairflag == 18 && pairlength <0)
+		      {
+			qual = -1;
+		      }
+		    else
+		      {
+			if(pairflag == 18 && (nextpos-pos) >= pairlength)
+			  {
+			    qual = -1;
+			  }
+		      }
+		  }
+		}      
+	      split = strtok( NULL, "\t" );
+	    }
+	}
     }
   
   else
     {
-      if(zip)
-	{ count_fp = gzopen(infile, "r"); }
-      else
-	{ count_fp = fopen(infile,"r"); }
-      
-      
-      if(strcmp(filetype, "M") || ((*par).qualcutoff == 0 && (*par).paired == 0))
+      if(strcmp(filetype,"M") || ((*par).qualcutoff == 0 && (*par).paired == 0))
 	{
-	  char *at = "@";
-	  char atchar = *at;
-	  
-	  char *hash = "#";
-	  char hashchar = *hash;
 	  
 	  while(egets (countline, 1000, count_fp) != NULL)
 	    { 
@@ -954,7 +1036,8 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
 	  if(samplecount)
 	    { (*par).nlines = nqreads; }
 	}
-
+    
+      
       else
 	{  
 	  char *c = NULL;
@@ -1007,12 +1090,11 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
 		}
 	    }
 	}	  
-  
-      if(zip)
-	{ gzclose(count_fp); }
-      else
-	{ fclose(count_fp); }
     }
+  if(zip)
+    { gzclose(count_fp); }
+  else
+    { fclose(count_fp); }
   //printf("%ld total reads.\n", nqreads);
   return nqreads;
 }
