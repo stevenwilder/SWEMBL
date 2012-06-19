@@ -957,10 +957,9 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
     {
       while(egets (countline, 1000, count_fp) != NULL)
 	{ 
-	  int pairflag, qual = 0;
-	  long int nextpos, pos, fraglength;
+	  struct readinfo countread;
 	  char countchar = *countline;
-	  if(countchar == atchar){ next; }
+	  if(countchar == atchar){ continue; }
 	  
 	  int i = 0;
 	  char *split = NULL;
@@ -972,51 +971,77 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
 		{
 		case(1): 
 		  {
-		    
-		    //printf("%s\n", (*read).strand); 780 = 4+8+256+512
-		    if((int)((int)atoi(split) & (int)780)) { qual = -1;}
+		    if((int)((int)atoi(split) & (int)16))
+		      { 
+			strcpy(countread.strand,"-");     
+		      }
+		    else
+		      { 
+			strcpy(countread.strand,"+"); 
+		      }
+		    //printf("%s\n", countread.strand); 780 = 4+8+256+512
+		    countread.qual=((int)((int)atoi(split) & (int)780)) ? -1 : 0;
 		    switch((int)((int)atoi(split) & (int)3))
 		      {
-		      case(3): { pairflag = 18; break;}
-		      case(1): { pairflag = 0; break;}
-		      default: { pairflag = -1; break;}
+		      case(3): { countread.pairflag = 18; break;}
+		      case(1): { countread.pairflag = 0; break;}
+		      default: { countread.pairflag = -1; break;}
 		      }
 		    break;
-		  }  
-		case(3): {pos = atoi(split); break;}
-		case(4): {if(atoi(split) < (*par).qualcutoff) { qual = -1;} break;}
+		  }   
+		case(2): {strcpy(countread.chr,split); break;}
+		case(3): {countread.pos = atoi(split); break;}
+		case(4): {countread.qual = atoi(split); break;}
 		case(6): 
 		  { 
-		    if(pairflag == 18 && strcmp(split,"*") && strcmp(split,"="))
+		    if(countread.pairflag == 18 && strcmp(split,"*") && strcmp(split,"="))
 		      {
-			qual = -1;
+			countread.pairflag = 0;
 		      }
 		  }
 		case(7):
 		  {
-		    nextpos = atoi(split);
-		    if(pairflag == 18 && nextpos == 0)
+		    countread.nextpos = atoi(split);
+		    if(countread.pairflag == 18 && countread.nextpos == 0)
 		      { 
-			qual = -1; 
+			countread.pairflag = 0; 
 		      }
 		  }
 		case(8):
 		  {
-		    pairlength = atoi(split);
-		    if(pairflag == 18 && pairlength <0)
+		    countread.pairlength = atoi(split);
+		    if(countread.pairflag == 18 && countread.pairlength <0)
 		      {
-			qual = -1;
+			countread.pairflag = 0;
 		      }
 		    else
 		      {
-			if(pairflag == 18 && (nextpos-pos) >= pairlength)
+			if(countread.pairflag == 18 && (countread.nextpos-countread.pos) >= countread.pairlength)
 			  {
-			    qual = -1;
+			    countread.pairflag = 0;
 			  }
 		      }
 		  }
-		}      
+		case(9):
+		  {
+		    if(countread.pairflag != 18)
+		      {
+			countread.pairlength = strlen(split);
+		      }
+		  }
+		}
+	      if(!strcmp(countread.chr,"*") || countread.pos == 0)
+		{
+		  countread.qual = -1;
+		}   
 	      split = strtok( NULL, "\t" );
+	    }
+	  if(countread.pairflag != 0)
+	    {
+	      if(countread.qual >= (*par).qualcutoff)
+		{ nqreads++;}
+	      if(samplecount)
+		{ (*par).nlines++; }
 	    }
 	}
     }
