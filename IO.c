@@ -977,80 +977,65 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
 	  char countchar = *countline;
 	  if(countchar == atchar){ continue; }
 	  
-	  int i = 0;
 	  char *split = NULL;
 	  split = strtok( countline, "\t" );
 	    
-	  
-	  for(i=0;i <= 8; i++)
-	    {
-	      switch(i)
-		{
-		case(1): 
-		  {
+	  split = strtok( NULL, "\t");
 
-		    if((int)((int)atoi(split) & (int)16))
-		      { 
-			strcpy(countread.strand,"-");     
-		      }
-		    else
-		      { 
-			strcpy(countread.strand,"+"); 
-		      }
-		    //printf("%s\n", countread.strand); 780 = 4+8+256+512
-		    countread.qual=((int)((int)atoi(split) & (int)780)) ? -1 : 0;
-		    switch((int)((int)atoi(split) & (int)3))
-		      {
-		      case(3): { countread.pairflag = 18; break;}
-		      case(1): { countread.pairflag = 0; break;}
-		      default: { countread.pairflag = -1; break;}
-		      }
-		    break;
-		  }   
-		case(2): {strcpy(countread.chr,split); break;}
-		case(3): {countread.pos = atoi(split); break;}
-		case(4): {countread.qual = atoi(split); break;}
-		case(6): 
-		  { 
-		    if(countread.pairflag == 18 && strcmp(split,"*") && strcmp(split,"="))
-		      {
-			countread.pairflag = 0;
-		      }
-		    break;
-		  }
-		case(7):
-		  {
-		    countread.nextpos = atoi(split);
-		    if(countread.pairflag == 18 && countread.nextpos == 0)
-		      { 
-			countread.pairflag = 0; 
-		      }
-		    break;
-		  }
-		case(8):
-		  {
-		    countread.pairlength = atoi(split);
-		    if(countread.pairflag == 18 && countread.pairlength <0)
-		      {
-			countread.pairflag = 0;
-		      }
-		    else
-		      {
-			if(countread.pairflag == 18 && (countread.nextpos-countread.pos) >= countread.pairlength)
-			  {
-			    countread.pairflag = 0;
-			  }
-		      }
-		    break;
-		  }
-		}
-	      split = strtok( NULL, "\t" );
+	  if((int)((int)atoi(split) & (int)16))
+	    { 
+	      strcpy(countread.strand,"-");     
+	    }
+	  else
+	    { 
+	      strcpy(countread.strand,"+"); 
+	    }
+	  //printf("%s\n", countread.strand); 780 = 4+8+256+512
+	  countread.qual=((int)((int)atoi(split) & (int)780)) ? -1 : 0;
+
+	  if((int)((int)atoi(split) & (int)3) == 1)
+	    {
+	      continue;
+	    }
+	  countread.pairflag = ((int)((int)atoi(split) & (int)3) == 3) ? 18 : -1;
+	      	  
+
+	  split = strtok( NULL, "\t");
+	  strcpy(countread.chr,split); 
+	  
+	  split = strtok( NULL, "\t");
+	  countread.pos = atoi(split);
+
+	  split = strtok( NULL, "\t");
+	  countread.qual = atoi(split);
+
+	  if(countread.qual == 0 || !strcmp(countread.chr,"*") || countread.pos == 0)
+	    {
+	      continue;
+	    }
+
+	  split = strtok( NULL, "\t");
+	  split = strtok( NULL, "\t");
+	  
+	  if(countread.pairflag == 18 && strcmp(split,"*") && strcmp(split,"="))
+	    {
+	      continue;
+	    }
+
+	  split = strtok( NULL, "\t");
+	  countread.nextpos = atoi(split);
+	  if(countread.pairflag == 18 && countread.nextpos == 0)
+	    { 
+	      continue; 
+	    }
+
+	  split = strtok( NULL, "\t");
+	  countread.pairlength = atoi(split);
+	  if(countread.pairflag == 18 && (countread.pairlength <0 || (countread.nextpos-countread.pos) >= countread.pairlength))
+	    {
+	      continue;
 	    }
 	  
-	  if(!strcmp(countread.chr,"*") || countread.pos == 0)
-	    {
-	      countread.qual = -1;
-	    }   
 	  if(countread.pairflag != 0)
 	    {
 	      if(countread.qual >= (*par).qualcutoff)
