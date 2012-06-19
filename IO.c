@@ -4,15 +4,15 @@ struct param get_parameters(char infile[1000], char outfile[1000], char reffile[
 {
   struct param par;
   par.bg = 0;
-  par.posbg = 0.01;
-  par.longbg = 0.02;
-  par.min_above_bg = 8;
+  par.posbg = 0;
+  par.longbg = 0;
+  par.min_above_bg = 0;
   par.threshold = 5;
   par.seqlength = 0;
   par.qualcutoff = 0;
   par.resultcutoff = 0;
   par.pen_inc = 70;
-  par.maxtotal = 0;
+  par.maxtotal = -1;
   par.fraglength = 0;
   par.ref = 0;
   par.reffraglength = 0;
@@ -185,15 +185,22 @@ struct param get_parameters(char infile[1000], char outfile[1000], char reffile[
  
  if(par.totalreads && relativebg)
    {
-     par.posbg = relativebg * par.totalreads * par.proportion / 3000000;
-     par.longbg = par.posbg * 5;
-     par.maxtotal = relativebg * 300 * par.proportion;
-     par.min_above_bg = ((relativebg * par.totalreads * par.proportion / 7500) > 6) ? ceil(relativebg * par.totalreads *par.proportion / 7500) : 6;
+     par.posbg = (par.posbg == 0) ? relativebg * par.totalreads * par.proportion / 3000000 : par.posbg;
+     par.longbg = (par.longbg == 0) ? relativebg * par.totalreads * par.proportion / 600000 : par.longbg;
+     par.maxtotal = (par.maxtotal == -1) ? relativebg * 300 * par.proportion : par.maxtotal;
+     par.min_above_bg = (par.min_above_bg == 0) ? (((relativebg * par.totalreads * par.proportion / 7500) > 6) ? ceil(relativebg * par.totalreads *par.proportion / 7500) : 6) : par.min_above_bg;
      if(par.ref)
        {
 	 par.refpen *= ((double)par.totalreads /(double)par.totalrefreads);
 	 par.refthreshold /= par.refpen;
        }
+   }
+ else
+   {
+     par.posbg = (par.posbg == 0) ? 0.01 : par.posbg;
+     par.longbg = (par.longbg == 0) ? 0.02 : par.longbg;
+     par.maxtotal = (par.maxtotal == -1) ? 0 : par.maxtotal;
+     par.min_above_bg = (par.min_above_bg == 0) ? 8 : par.min_above_bg;
    }
 
  if(par.overlapmode)
