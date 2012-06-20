@@ -228,12 +228,13 @@ int main(int argc, char **argv)
 	      nreadsleft --;
 	      readsampleline(&read, nextline, &endfile, par.fraglength, par.seqlength, par.qualcutoff, par.paired, par.overlapmode, par.bootstrap);
 	  //printf("%f\t%f\t%d\t%d\n",(double)rand() / ((double)(RAND_MAX)+(double)(1)), (double)nreadsleft/(double)(totalreadsleft),nreadsleft,totalreadsleft);	  
-	  negpos = set_negpos(&read, &endfile, par.seqlength, par.fraglength);
-
+	      negpos = par.paired ? set_negpos(&read, &endfile, read.pairlength, (par.fraglength > read.pairlength) ? par.fraglength : read.pairlength) : set_negpos(&read, &endfile, par.seqlength, par.fraglength);
+	      //negpos = set_negpos(&read, &endfile, par.seqlength, par.fraglength);
 	  //read.changechr = 0;
 	  //printf("NEG:%ld\t%d\t%ld\t%ld\n", negpos,read.changechr, fragpos, read.pos);
-	  set_fragpos(read, &fragpos, &fragend, negpos, par.fraglength);	  
-	  //printf("FRG:%ld\n", fragpos);
+	  //set_fragpos(read, &fragpos, &fragend, negpos, par.fraglength); 
+	      set_fragpos(read, &fragpos, &fragend, negpos, (par.paired && par.fraglength < read.pairlength) ? read.pairlength : par.fraglength);
+	      //printf("FRG:%ld\n", fragpos);
 	  while(fragpos <= negpos)
 	    {
 	      struct countend tempcountend = cntequalhead(fragpos, &pvepos); //CODE

@@ -333,7 +333,7 @@ int platform_strand_endline()
 	  else             {return(5);}
 	}
       if(!strcmp(filetype,"S"))
-	{return(3);}
+	{return(9);}
     }
   return(0);
 }
@@ -588,7 +588,10 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 			    case(3): {(*read).pos = atoi(split); break;}
 			    case(4): 
 			      {
-				(*read).qual = atoi(split); 				
+				if((*read).qual >= 0)
+				  {
+				    (*read).qual = atoi(split); 
+				  }
 				if(!strcmp((*read).chr,"*") || (*read).pos == 0)
 				  {
 				    (*read).qual = -1;
@@ -645,7 +648,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 	  split = strtok( NULL, "\t" );
 	}
 	
-      //printf("ALL1: %s\t%ld\t%s\n", (*read).chr, (*read).pos, (*read).strand);
+      //printf("ALL1: %s\t%ld\t%s\t%d\t%d\n", (*read).chr, (*read).pos, (*read).strand, (*read).pairlength, (*read).pairflag);
 	  
       if(!(*read).pairlength) { (*read).pairlength = seqlength; }
 
@@ -799,7 +802,10 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				case(3): {nlread.pos = atoi(nls); break;}
 				case(4): 
 				  {
-				    nlread.qual = atoi(nls); 
+				    if(nlread.qual >= 0)
+				      {
+					nlread.qual = atoi(nls);
+				      }
 				    if(!strcmp(nlread.chr,"*") || nlread.pos == 0)
 				      {
 					nlread.qual = -1;
@@ -856,7 +862,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 	      nls = strtok( NULL, "\t" );
 	    }
 	  //printf("NEXTLINE4:%s\n", nextline);	    
-	  //printf("ALL: %s\t%ld\t%s\n", nlread.chr, nlread.pos, nlread.strand);
+	  //printf("ALL: %s\t%ld\t%s\t%d\t%d\n", nlread.chr, nlread.pos, nlread.strand, nlread.pairlength, nlread.pairflag);
 	  
 	  //if(!endfile && egets (nextline, 1000, in_fp) == NULL)
 	  //{endfile = 1;}
@@ -1014,7 +1020,8 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
 	  countread.pos = atoi(split);
 
 	  split = strtok( NULL, "\t");
-	  countread.qual = atoi(split);
+	  if(countread.qual >= 0)
+	    {countread.qual = atoi(split);}
 
 	  if(countread.qual == 0 || !strcmp(countread.chr,"*") || countread.pos == 0)
 	    {
@@ -1271,7 +1278,10 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 				case(3): {(*refread).pos = atoi(refsplit); break;}
 				case(4): 
 				  {
-				    (*refread).qual = atoi(refsplit);  
+				    if((*refread).qual >= 0)
+				      {
+					(*refread).qual = atoi(refsplit);  
+				      }
 				    if(!strcmp((*refread).chr,"*") || (*refread).pos == 0)
 				      {
 					(*refread).qual = -1;
