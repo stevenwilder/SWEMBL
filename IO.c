@@ -777,7 +777,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				
 				case(1): 
 				  {
-				    if((int)((int)atoi(split) & (int)16))
+				    if((int)((int)atoi(nls) & (int)16))
 				      { 
 					strcpy(nlread.strand,"-");     
 				      }
@@ -786,8 +786,8 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 					strcpy(nlread.strand,"+"); 
 				      }
 				    //printf("%s\n", nlread.strand); 780 = 4+8+256+512
-				    nlread.qual=((int)((int)atoi(split) & (int)780)) ? -1 : 0;
-				    switch((int)((int)atoi(split) & (int)3))
+				    nlread.qual=((int)((int)atoi(nls) & (int)780)) ? -1 : 0;
+				    switch((int)((int)atoi(nls) & (int)3))
 				      {
 				      case(3): { nlread.pairflag = 18; break;}
 				      case(1): { nlread.pairflag = 0; break;}
@@ -795,11 +795,11 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				      }
 				    break;
 				  }   
-				case(2): {strcpy(nlread.chr,split); break;}
-				case(3): {nlread.pos = atoi(split); break;}
+				case(2): {strcpy(nlread.chr,nls); break;}
+				case(3): {nlread.pos = atoi(nls); break;}
 				case(4): 
 				  {
-				    nlread.qual = atoi(split); 
+				    nlread.qual = atoi(nls); 
 				    if(!strcmp(nlread.chr,"*") || nlread.pos == 0)
 				      {
 					nlread.qual = -1;
@@ -808,7 +808,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				  }
 				case(6): 
 				  { 
-				    if(nlread.pairflag == 18 && strcmp(split,"*") && strcmp(split,"="))
+				    if(nlread.pairflag == 18 && strcmp(nls,"*") && strcmp(nls,"="))
 				      {
 					nlread.pairflag = 0;
 				      }
@@ -816,7 +816,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				  }
 				case(7):
 				  {
-				    nlread.nextpos = atoi(split);
+				    nlread.nextpos = atoi(nls);
 				    if(nlread.pairflag == 18 && nlread.nextpos == 0)
 				      { 
 					nlread.pairflag = 0; 
@@ -825,7 +825,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				  }
 				case(8):
 				  {
-				    nlread.pairlength = atoi(split);
+				    nlread.pairlength = atoi(nls);
 				    if(nlread.pairflag == 18 && nlread.pairlength <0)
 				      {
 					nlread.pairflag = 0;
@@ -843,7 +843,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				  {
 				    if(nlread.pairflag != 18)
 				      {
-					nlread.pairlength = strlen(split);
+					nlread.pairlength = strlen(nls);
 				      }
 				    break;
 				  }
