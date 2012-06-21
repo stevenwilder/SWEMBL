@@ -1023,7 +1023,7 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
 	  if(countread.qual >= 0)
 	    {countread.qual = atoi(split);}
 
-	  if(countread.qual == 0 || !strcmp(countread.chr,"*") || countread.pos == 0)
+	  if(countread.qual < (*par).qualcutoff || !strcmp(countread.chr,"*") || countread.pos == 0)
 	    {
 	      continue;
 	    }
@@ -1053,7 +1053,7 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
 	  if(countread.pairflag != 0)
 	    {
 	      if(countread.qual >= (*par).qualcutoff)
-		{ nqreads++;}
+		{ nqreads++; }
 	      if(samplecount)
 		{ (*par).nlines++; }
 	    }
