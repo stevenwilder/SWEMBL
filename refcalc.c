@@ -3,7 +3,9 @@
 void reference_reads(struct readinfo read, struct readinfo *refread, int *refendfile, struct param par, int *nsavedrefchrs, long int *refnegpos, long int negpos, long int *fragpos)
   {
     //printf("%s\t%s\t%s\t%s\n", read.chr, read.prevchr, (*refread).chr, (*refread).prevchr);
-	  
+    unsigned int refseqlength=0;
+    int reffraglength=0;
+    
     if(strcmp(read.chr, read.prevchr))
       {
 	//printf("Del\n");
@@ -43,6 +45,9 @@ void reference_reads(struct readinfo read, struct readinfo *refread, int *refend
 	else
 	  {
 	    readrefline(refread, refendfile, par.reffraglength, par.paired, par.bootstrap); 
+	    refseqlength = par.paired ? (*refread).pairlength : par.refseqlength;
+	    reffraglength = (par.paired && par.reffraglength < (*refread).pairlength) ? (*refread).pairlength : par.reffraglength;
+	    
 	    //printf("AB\t%s\t%s\t%s\t%s\n",read.chr,read.prevchr,(*refread).chr, (*refread).prevchr);
 	    //*refnegpos = (*refread).pos - par.reffraglength + par.refseqlength;  
 	    *refnegpos = 0;
@@ -159,7 +164,7 @@ void reference_reads(struct readinfo read, struct readinfo *refread, int *refend
 		  ///(*refread).pos = shift(&savedrefpos).startend[0];
 		    (*refread).pos = head(&savedrefpos).startend[0];
 		    //printf("D:%s\n",(*refread).chr);
-		    *refnegpos = (*refread).pos - par.reffraglength + par.refseqlength;
+		    *refnegpos = (*refread).pos - reffraglength + refseqlength;
 		    strcpy((*refread).strand, pvestring);
 
 		}
@@ -248,7 +253,7 @@ void reference_reads(struct readinfo read, struct readinfo *refread, int *refend
 		       ///savedrefs[*nsavedrefchrs - 1].negcount++;
 		       //push((*refread).pos, &savednegrefs);
 		       //}
-		 pushchr((*refread).pos - par.reffraglength + par.refseqlength, (*refread).pos+par.refseqlength-1, (*refread).negcount, &refchrs_nve);
+		 pushchr((*refread).pos - reffraglength + refseqlength, (*refread).pos+refseqlength-1, (*refread).negcount, &refchrs_nve);
 	       }
 	   
 	    
@@ -257,6 +262,8 @@ void reference_reads(struct readinfo read, struct readinfo *refread, int *refend
 	    //printf("AM:%s\t%s\n",(*refread).chr,(*refread).prevchr);
 	    
 	readrefline(refread, refendfile, par.reffraglength, par.paired, par.bootstrap);
+	refseqlength = par.paired ? (*refread).pairlength : par.refseqlength;
+	reffraglength = (par.paired && par.reffraglength < (*refread).pairlength) ? (*refread).pairlength : par.reffraglength;
       }
 	// printf("Saved: %s\t%d\t%ld\t%ld\n", savedrefs[*nsavedrefchrs - 1].chr, *nsavedrefchrs,savedrefs[*nsavedrefchrs - 1].pvecount,savedrefs[*nsavedrefchrs - 1].negcount);
 	///}
@@ -301,7 +308,7 @@ void reference_reads(struct readinfo read, struct readinfo *refread, int *refend
 	  {	    
 	    push((*refread).pos,(*refread).pos + (*refread).pairlength -1, (*refread).count, &refpvepos);
 	    (*refread).pos = shift(&savedrefpos).startend[0];
-	    *refnegpos = (*refread).pos - par.reffraglength + par.refseqlength;
+	    *refnegpos = (*refread).pos - reffraglength + refseqlength;
 	    //printf("S:%ld\n",*refnegpos);
 	  }
 	//else { strcpy(refchr,"0"); }
@@ -319,11 +326,13 @@ void reference_reads(struct readinfo read, struct readinfo *refread, int *refend
 		// { 
 		//    if(strcmp((*refread).strand, pvestring) && !par.paired)
 		if((*refread).negcount)
-		      { push((*refread).pos - par.reffraglength + par.refseqlength, (*refread).pos+par.refseqlength-1, (*refread).negcount, &refnvepos); }
+		      { push((*refread).pos - reffraglength + refseqlength, (*refread).pos+refseqlength-1, (*refread).negcount, &refnvepos); }
 		      //  }
 	      }
 	    readrefline(refread, refendfile, par.reffraglength, par.paired, par.bootstrap);
-	    *refnegpos = (*refread).pos - par.reffraglength + par.refseqlength;
+	    refseqlength = par.paired ? (*refread).pairlength : par.refseqlength;
+	    reffraglength = (par.paired && par.reffraglength < (*refread).pairlength) ? (*refread).pairlength : par.reffraglength;
+	    *refnegpos = (*refread).pos - reffraglength + refseqlength;
 	  }
       }
    

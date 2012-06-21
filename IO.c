@@ -1338,6 +1338,7 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 	  refsplit = strtok( NULL , "\t");
 	}
     }
+  //printf("RALL1: %s\t%ld\t%s\t%d\t%d\n", (*refread).chr, (*refread).pos, (*refread).strand, (*refread).pairlength, (*refread).pairflag);
   if(!paired){ (*refread).pairlength = reffraglength; }
   if(strcmp(filetype,"C"))
     {

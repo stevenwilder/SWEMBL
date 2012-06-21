@@ -96,6 +96,9 @@ int main(int argc, char **argv)
   //srand(time(NULL));;
   //srand(1);
   
+  unsigned int seqlength;
+  int fraglength;
+  
   strcpy(prev.last_but_1_region.chr,"");
   prev.last_but_1_region.total = 0;
   prev.last_but_1_region.print_total = 0;
@@ -114,20 +117,23 @@ int main(int argc, char **argv)
 	    { 
 	      nreadsleft--;
 	      readsampleline(&read,nextline, &endfile, par.fraglength, par.seqlength, par.qualcutoff, par.paired, par.overlapmode, par.bootstrap); //HAS PUSH IN
-	  negpos = set_negpos(&read, &endfile, par.seqlength, par.fraglength);
+	      seqlength = par.paired ? read.pairlength : par.seqlength;
+	      fraglength = (par.paired && par.fraglength < read.pairlength) ? read.pairlength : par.fraglength;
+	      
+	  negpos = set_negpos(&read, &endfile, seqlength, fraglength);
 	  //printf("NEG:%ld\t%d\t%ld\t%ld\n", negpos,read.changechr, fragpos, read.pos);
 	  //read.changechr = 0;	  
-	  set_fragpos(read, &fragpos, &fragend, negpos, par.fraglength);
+	  set_fragpos(read, &fragpos, &fragend, negpos, fraglength);
 	  //printf("FRG:%ld\n", fragpos);
 	  reference_reads(read, &refread, &refendfile, par, &nsavedrefchrs, &refnegpos, negpos, &fragpos);
 	  while(fragpos <= negpos)
 	    {
 	      struct countend tempcountend = cntequalhead(fragpos, &pvepos); //CODE	      
 	      //printf("TCE1:%f\t%f\t%ld\n", read.count, read.negcount, tempcountend.end);
-	      read.count = tempcountend.count + ((fragpos == (read.pos + par.seqlength - par.fraglength)) ? read.negcount : 0);
+	      read.count = tempcountend.count + ((fragpos == (read.pos + seqlength - fraglength)) ? read.negcount : 0);
 	      if(read.count > par.threshold){ read.count = par.threshold; }
 	      if(tempcountend.count){fragend = tempcountend.end; read.prevpos = fragpos;}	      
-	      else{ if(fragend < fragpos + par.fraglength - 1){ fragend = fragpos + par.fraglength - 1;} }
+	      else{ if(fragend < fragpos + fraglength - 1){ fragend = fragpos + fraglength - 1;} }
 
 	      //read.refcount = cntequalhead(fragpos, &refpvepos).count + cntequalhead(fragpos, &refnvepos).count;
 	      tempcountend = cntequalhead(fragpos, &refpvepos); read.refcount = tempcountend.count;
@@ -167,7 +173,7 @@ int main(int argc, char **argv)
 		    }
 
 		  
-		  if(par.wig && read.count > 0){push_wigcounts(read, fragpos, prevfragpos, fragend, par.fraglength, conversion, par.contigrows, wigchr, &wigstart,par.paired, &wigonevalue);}
+		  if(par.wig && read.count > 0){push_wigcounts(read, fragpos, prevfragpos, fragend, fraglength, conversion, par.contigrows, wigchr, &wigstart,par.paired, &wigonevalue);}
 		  while(!empty(&refpvepos) && head(&refpvepos).startend[0] == fragpos)
 		    {
 		      sortunshift(fragpos, head(&refpvepos).startend[1], head(&refpvepos).count, &refbackpos);
@@ -188,20 +194,20 @@ int main(int argc, char **argv)
 	      //printf("z\n");
 	      strcpy(read.prevchr, read.chr);	
 	      
-	      //if(!par.paired && read.negcount && (fragpos == (read.pos + par.seqlength - par.fraglength))) 
-	      if(read.negcount && (fragpos == (read.pos + par.seqlength - par.fraglength))) 
+	      //if(!par.paired && read.negcount && (fragpos == (read.pos + seqlength - fraglength))) 
+	      if(read.negcount && (fragpos == (read.pos + seqlength - fraglength))) 
 		{		
 		  /*int i;
 		    for(i = 0; i < read.negcount; i++) 
 		    {
-		      unshift(fragpos, fragpos + par.fraglength - 1, 1, &backpos); 
+		      unshift(fragpos, fragpos + fraglength - 1, 1, &backpos); 
 		      // printf("UF:%ld\n",fragpos);
 		    }
 		  */
-		  unshift(fragpos, fragpos + par.fraglength - 1, read.negcount, &backnvepos);
-		  push_peakheight(1, fragpos, fragpos + par.fraglength - 1, read.negcount, &curr, &possend);
+		  unshift(fragpos, fragpos + fraglength - 1, read.negcount, &backnvepos);
+		  push_peakheight(1, fragpos, fragpos + fraglength - 1, read.negcount, &curr, &possend);
 		}
-	      update_fragpos(&fragpos, par.seqlength, par.fraglength, read);
+	      update_fragpos(&fragpos, seqlength, fraglength, read);
 	      //printf("FRG2:%ld\n", fragpos);
 	      update_fragpos_ref(&fragpos, read.chr, refread.chr);
 	      //printf("FRG3:%ld\t%s\t%s\n", fragpos, read.chr, refread.chr);
@@ -221,8 +227,6 @@ int main(int argc, char **argv)
 	  
   else
     {
-      unsigned int seqlength;
-      int fraglength;
       while(!endfile)
 	{
 	  if(par.proportion == 1 || (double)rand() / ((double)(RAND_MAX)+(double)(1)) < (double)nreadsleft/(double)(totalreadsleft--))
