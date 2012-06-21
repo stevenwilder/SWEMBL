@@ -380,7 +380,7 @@ void output_regions(struct region possend, struct region *olr, struct region pve
       
       possend.summit = -1 * median(&peaksummits);
       // fprintf(out_fp,"%s\t%ld\t%ld\t%f\t%ld\t%d\t%f\t%f\t%ld\t%ld\t-\n", possend.chr, possend.start, possend.end, possend.count, possend.end-possend.start+1, possend.pos, possend.total,possend.refcount, possend.seen_end, possend.seen_start);
-      // printf("%s\t%ld\t%ld\t%f\t%ld\t%d\t%f\t%f\t%f\t%f\t%ld\t%ld\t-\n", possend.chr, possend.start, possend.end, possend.count, possend.end-possend.start+1, possend.pos, possend.total, possend.refcount, possend.peakheightmax, possend.summit, possend.seen_end, possend.seen_start);
+      //printf("%s\t%ld\t%ld\t%f\t%ld\t%d\t%f\t%f\t%f\t%f\t%ld\t%ld\t-\n", possend.chr, possend.start, possend.end, possend.count, possend.end-possend.start+1, possend.pos, possend.total, possend.refcount, possend.peakheightmax, possend.summit, possend.seen_end, possend.seen_start);
       // while(!empty(&peaksummits)) { printf("%f ", shift(&peaksummits).count); } printf("\n");      );
       //printf("OR\n");
 

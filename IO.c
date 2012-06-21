@@ -1356,7 +1356,7 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 	  else{printf("Reference strand not recognised.\n");exit(1);}
 	}
 
-      if(paired && ((!strcmp((*refread).strand,negstring)) || (*refread).pairflag != 18))
+      if(paired && ((*refread).pairflag == 0 || ((*refread).pairflag == 18 && !strcmp((*refread).strand,negstring))))
 	{ (*refread).count = 0; (*refread).pvecount = 0; (*refread).negcount = 0; }
     }
   //return(ref);

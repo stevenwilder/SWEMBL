@@ -3,8 +3,9 @@
 void reference_reads(struct readinfo read, struct readinfo *refread, int *refendfile, struct param par, int *nsavedrefchrs, long int *refnegpos, long int negpos, long int *fragpos)
   {
     //printf("%s\t%s\t%s\t%s\n", read.chr, read.prevchr, (*refread).chr, (*refread).prevchr);
-    unsigned int refseqlength=0;
-    int reffraglength=0;
+    
+    unsigned int refseqlength = par.paired ? (*refread).pairlength : par.refseqlength;
+    int reffraglength = (par.paired && par.reffraglength < (*refread).pairlength) ? (*refread).pairlength : par.reffraglength;
     
     if(strcmp(read.chr, read.prevchr))
       {
