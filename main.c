@@ -204,7 +204,7 @@ int main(int argc, char **argv)
 		      // printf("UF:%ld\n",fragpos);
 		    }
 		  */
-		  unshift(fragpos, fragpos + fraglength - 1, read.negcount, &backnvepos);
+		  sortunshift(fragpos, fragpos + fraglength - 1, read.negcount, &backnvepos);
 		  push_peakheight(1, fragpos, fragpos + fraglength - 1, read.negcount, &curr, &possend);
 		}
 	      update_fragpos(&fragpos, seqlength, fraglength, read);
@@ -286,7 +286,7 @@ int main(int argc, char **argv)
 	      //if(!par.paired && read.negcount && (fragpos == (read.pos + par.seqlength - par.fraglength))) {
 	      if(read.negcount && (fragpos == (read.pos + seqlength - fraglength))) 
 		{
-		  unshift(fragpos, fragpos + fraglength - 1, read.negcount, &backnvepos); 
+		  sortunshift(fragpos, fragpos + fraglength - 1, read.negcount, &backnvepos); 
 		  push_peakheight(1, fragpos, fragpos + fraglength - 1, read.negcount, &curr, &possend);
 		}
 		//int i; for(i = 0; i < read.negcount; i++) {unshift(fragpos, fragpos + par.fraglength - 1, 1, &backpos);}}
@@ -436,14 +436,14 @@ void store_results(struct readinfo read, struct region possend, struct param par
 	   while(!empty(&backpvepos) && head(&backpvepos).startend[1] == fragpos)
 	     {
 	       push_peakheight(-1, fragpos, head(&backpvepos).startend[0], head(&backpvepos).count, &back, &possend);
-	       //printf("SH: %s\t%ld\t%f\n", read.chr, head(&backpvepos).startend[0], head(&backpvepos).count);
+	       //printf("SH+: %s\t%ld\t%f\n", read.chr, head(&backpvepos).startend[0], head(&backpvepos).count);
 	       shift(&backpvepos);
 	     }
 
 	   while(!empty(&backnvepos) && head(&backnvepos).startend[1] == fragpos)
 	     {
 	       push_peakheight(-1, fragpos, head(&backnvepos).startend[0], head(&backnvepos).count, &back, &possend);
-	       //printf("SH: %s\t%ld\t%f\n", read.chr, head(&backnvepos).startend[0], head(&backnvepos).count);
+	       //printf("SH-: %s\t%ld\t%f\n", read.chr, head(&backnvepos).startend[0], head(&backnvepos).count);
 	       shift(&backnvepos);
 	     }
 
