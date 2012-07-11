@@ -177,12 +177,14 @@ int main(int argc, char **argv)
 		  while(!empty(&refpvepos) && head(&refpvepos).startend[0] == fragpos)
 		    {
 		      sortunshift(fragpos, head(&refpvepos).startend[1], head(&refpvepos).count, &refbackpos);
+		      //printf("SUS+:%ld\t%ld\t%ld\t%ld\n", head(&refpvepos).startend[0], fragpos,head(&refpvepos).startend[1], head(&refbackpos).startend[1]);
 		      push_peakheight(1, fragpos, head(&refpvepos).startend[1], -1 * par.refpen * head(&refpvepos).count, &curr, &possend);
 		      shift(&refpvepos);
 		    }
 		  while(!empty(&refnvepos) && head(&refnvepos).startend[0] == fragpos)
 		    {
-		      sortunshift(fragpos, head(&refnvepos).startend[1], head(&refnvepos).count, &refbackpos);
+		      sortunshift(fragpos, head(&refnvepos).startend[1], head(&refnvepos).count, &refbackpos);		      
+		      //printf("SUS-:%ld\t%ld\t%ld\t%ld\n", head(&refnvepos).startend[0], fragpos,head(&refnvepos).startend[1], head(&refbackpos).startend[1]);
 		      push_peakheight(1, fragpos, head(&refnvepos).startend[1], -1 * par.refpen * head(&refnvepos).count, &curr, &possend);
 		      shift(&refnvepos);
 		    }
@@ -201,9 +203,10 @@ int main(int argc, char **argv)
 		    for(i = 0; i < read.negcount; i++) 
 		    {
 		      unshift(fragpos, fragpos + fraglength - 1, 1, &backpos); 
-		      // printf("UF:%ld\n",fragpos);
+		      // 
 		    }
 		  */
+		  //printf("UF:%ld\n",fragpos);
 		  sortunshift(fragpos, fragpos + fraglength - 1, read.negcount, &backnvepos);
 		  push_peakheight(1, fragpos, fragpos + fraglength - 1, read.negcount, &curr, &possend);
 		}
@@ -411,16 +414,23 @@ void store_results(struct readinfo read, struct region possend, struct param par
 	   
 	   
 	   if(!empty(&refbackpos) && head(&refbackpos).startend[1] > fragpos) 
-	     { fragpos = head(&refbackpos).startend[1]; }
+	     { 
+	       //printf("BFref:%ld\t%ld\n", fragpos, head(&refbackpos).startend[1]);
+	       fragpos = head(&refbackpos).startend[1]; 
+	     }
 
 	   //read.count = sample_back_count(fragpos, &fragstart, par.threshold, &backpos);
 	   //read.count = sample_back_count(fragpos, &fragstart, par.threshold, &backpvepos) + 
 	   //           sample_back_count(fragpos, &fragstart, par.threshold, &backnvepos);
 	   read.negcount = sample_back_count(fragpos, &fragstart, par.threshold, &backpvepos);
 	   read.count = read.negcount + sample_back_count(fragpos, &fragstart, par.threshold, &backnvepos);
+	   if(read.count > par.threshold)
+	     {
+	       read.count = par.threshold;
+	     }
 	   read.refcount = ref_back_count(fragpos, par.refthreshold, &refbackpos);
  
-	   //printf("SBC:%ld\t%ld\t%f\t%f\n", fragpos, fragstart, read.count, read.refcount);
+	   //printf("SBC:%ld\t%ld\t%f\t%f\t%f\n", fragpos, fragstart, read.count, read.negcount, read.refcount);
 	   //if(read.count > 0){ back.pos++; }
 	   //update_total(-1, &back, &possend, fragpos+1-backstrand, fragpos, fragstart, prevfragpos, par, read, lastregion); //negpos?? 
 	   update_total(-1, &back, &possend, fragpos, fragpos, fragstart, prevfragpos, par, read, lastregion); //negpos?? 

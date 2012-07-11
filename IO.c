@@ -375,7 +375,7 @@ struct param get_firstline(int *endfile, char *nextline, struct param par)
   strcpy(seqline, nextline);
   // ***Calculate read length if unspecified for BED and MAQ*** 
       
-  if(par.seqlength == 0 && ((!strcmp(filetype,"B"))||(!strcmp(filetype,"M"))||(!strcmp(filetype,"C"))))
+  if(par.seqlength == 0 && ((!strcmp(filetype,"B") && par.paired == 0)||(!strcmp(filetype,"M"))||(!strcmp(filetype,"C"))))
     {
       strcpy(seqline,nextline);
       char *result = NULL;
@@ -624,7 +624,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				  }
 				else
 				  {
-				    if((*read).pairflag == 18 && ((*read).nextpos-(*read).pos) >= (*read).pairlength)
+				    if((*read).pairflag == 18 && ((*read).nextpos < (*read).pos))
 				      {
 					(*read).pairflag = 0;
 				      }
@@ -695,7 +695,8 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 
 
       // **Continue reading in file while position and chromosome are the same
-      while(nlread.pos == (*read).pos && !strcmp(nlread.chr,(*read).chr) && !(*endfile))
+      //while(nlread.pos == (*read).pos && !strcmp(nlread.chr,(*read).chr) && !(*endfile))
+      while(nlread.pos == (*read).pos && nlread.pairlength == (*read).pairlength && !strcmp(nlread.chr,(*read).chr) && !(*endfile))
 	{ 	 
 	  if(!firsttime)
 	    {
@@ -746,7 +747,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 	      else
 		{
 		  if(!strcmp(filetype,"B"))
-		    {
+		    {		      
 		      switch(j)
 			{
 			case(0): {strcpy(nlread.chr,nls); break;}
@@ -838,7 +839,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 				      }
 				    else
 				      {
-					if(nlread.pairflag == 18 && (nlread.nextpos-nlread.pos) >= nlread.pairlength)
+					if(nlread.pairflag == 18 && (nlread.nextpos < nlread.pos))
 					  {
 					    nlread.pairflag = 0;
 					  }
@@ -1045,7 +1046,7 @@ long int count_sample_lines(struct param *par, char infile[1000], int samplecoun
 
 	  split = strtok( NULL, "\t");
 	  countread.pairlength = atoi(split);
-	  if(countread.pairflag == 18 && (countread.pairlength <0 || (countread.nextpos-countread.pos) >= countread.pairlength))
+	  if(countread.pairflag == 18 && (countread.pairlength <0 || countread.nextpos <= countread.pos)) //What if split into >2
 	    {
 	      continue;
 	    }
@@ -1314,7 +1315,7 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 				      }
 				    else
 				      {
-					if((*refread).pairflag == 18 && ((*refread).nextpos-(*refread).pos) >= (*refread).pairlength)
+					if((*refread).pairflag == 18 && ((*refread).nextpos < (*refread).pos))
 					  {
 					    (*refread).pairflag = 0;
 					  }

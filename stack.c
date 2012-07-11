@@ -289,12 +289,13 @@ void sortunshift(long int start, long int end, double count, stack *stk)
 	{
 	  elem *q;
 	  q = stk->head;
-	  while(q->next && end <= q->next->d[1] && start > q->next->d[0])
+	  //while(q->next && end <= q->next->d[1] && start > q->next->d[0])
+	  while(q->next && (end < q->next->d[1] || (end == q->next->d[1] && start > q->next->d[0])))
 	    {
 	      //printf("r:%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\t%ld\n", q->next->d[0],q->next->d[1], start, end,stk->head->d[0],stk->head->d[1],stk->tail->d[0],stk->tail->d[1]);
 	    ////printf("r:%ld\t%ld\t%ld\t%ld\t%ld\t%ld\n", q->next->d[0],q->next->d[1], start, end,stk->head->d[0],stk->head->d[1]);
 	      q = q->next;
-	    }
+	    }	  
 	  p -> next = q -> next;
 	  q -> next = p; 
 	}

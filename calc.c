@@ -87,6 +87,8 @@ void update_total(int dir, struct region *curr, struct region *possend, long int
 
      double newtot = (*curr).total;
 
+     //printf("A5\tnewtot:%f\n",newtot);
+
      if(read.count > 0)
        {
 	 newtot = (gap < par.pen_inc) ?
@@ -99,7 +101,7 @@ void update_total(int dir, struct region *curr, struct region *possend, long int
 	   (*curr).print_total - par.bg - par.posbg * par.pen_inc - par.longbg * (gap - par.pen_inc) ;
        }
      
-     //printf("A5\tnewtot:%f\n",newtot);
+     //printf("A5a\tnewtot:%f\n",newtot);
 	      
      //printf("A6\n");
      if(newtot <= 0.00001)  //End of region
@@ -118,9 +120,10 @@ void update_total(int dir, struct region *curr, struct region *possend, long int
        {
 	 newtot = newtot + read.count - read.refcount * par.refpen;
 	 (*curr).print_total += read.count - read.refcount * par.refpen;
-	 //printf("A6\tnewtot:%f\t%ld\t%ld\t%ld\n",newtot,fragpos,fragend,negpos);
 	 (*curr).count += read.count;
 	 (*curr).refcount += read.refcount;
+	 
+	 //printf("A6\tnewtot:%f\t%f\t%ld\t%ld\t%ld\n",(*curr).print_total,newtot,fragpos,fragend,negpos);
 	 if(read.count > 0) 
 	   { 
 	     (*curr).pos++; 
@@ -183,7 +186,7 @@ void update_total(int dir, struct region *curr, struct region *possend, long int
 	     (*curr).total = (par.maxtotal && newtot > par.maxtotal) ? par.maxtotal : newtot;
 	     if(newtot >= (*possend).total && read.count > 0)     //New high value of function
 	       {
-		 //printf("%f %f %ld %d\n", newtot, (*possend).total, read.pos, dir);
+		 //printf("A7:%f %f %ld %d\n", newtot, (*possend).total, read.pos, dir);
 		 *possend = *curr;
 	       }
 	   }
@@ -351,9 +354,10 @@ double sample_back_count(long int fragpos, long int *fragstart, double threshold
 	      i++;
 	    }
 	}      
-      // printf("SBC\t%d\t%f\n", i, count);
+      // printf("SBC\t%ld\t%ld\t%d\t%f\n", fragpos, *fragstart, i, count);
     }
   
+  //printf("SBC\t%ld\t%ld\t%f\n", fragpos, *fragstart, count);
   if(count > threshold){ count = threshold;}
   return(count);
 }
