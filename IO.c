@@ -89,7 +89,7 @@ struct param get_parameters(char infile[1000], char outfile[1000], char reffile[
      case 'g': par.overlapmode = 1; break;
      case 'T': par.bootstrap = 1; break;
      case 'D': rseed = atoi(optarg); break;
-     case 'v': printf("SWEMBL version 3.6\n"); exit (0);
+     case 'v': printf("SWEMBL version 4.0\n"); exit (0);
      case 'h': print_help();
      case '?': 
        if (optopt == 'i')
@@ -116,7 +116,7 @@ struct param get_parameters(char infile[1000], char outfile[1000], char reffile[
  if(!strcmp(outfile,""))
     {
       strcpy(outfile,infile);
-      strcat(outfile, ".SWEMBL.3.6.txt");
+      strcat(outfile, ".SWEMBL.4.0.txt");
     }
 
  if(strcmp(reffile,""))
