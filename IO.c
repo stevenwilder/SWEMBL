@@ -438,7 +438,7 @@ struct param get_firstline(int *endfile, char *nextline, struct param par)
   //if(par.ref)
   //  {
       fprintf(out_fp, "#Input\t%s\n#Reference\t%s\n#Sequence length\t%d\n#Fragment length\t%d\n#Background\t%f\n#Position Background\t%f\n#Long Background\t%f\n#Threshold\t%f\n#Minimum count above bg\t%d\n#Penalty increase\t%d\n#Quality cutoff\t%f\n#Result cutoff\t%f\n#Penalty factor\t%f\n", infile, reffile, par.seqlength, par.fraglength, par.bg, par.posbg, par.longbg, par.threshold, par.min_above_bg, par.pen_inc, par.qualcutoff, par.resultcutoff, par.refpen);
-      fprintf(out_fp, "Region\tStart pos.\tEnd pos.\tCount\tLength\tUnique pos.\tScore\tRef. count\tMax. Coverage\tSummit\n");
+      fprintf(out_fp, "Region\tStart pos.\tEnd pos.\tCount\tLength\tUnique pos.\tScore\tRef. count\tMax. Coverage\tSummit\tP value\n");
       //   }
       // else
       // {
@@ -540,7 +540,8 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 		    case(0): {strcpy((*read).chr,split); break;}
 		    case(1): {(*read).pos = atoi(split); break;}
 		    case(2): {
-		               (*read).pairlength = atoi(split) - (*read).pos + 1; 
+		               (*read).pairlength = atoi(split) - (*read).pos; 
+			       //+1??
 			       break;
 		             } 
 		    case(5): {strcpy((*read).strand,split); break;}
@@ -753,7 +754,7 @@ void readsampleline(struct readinfo *read,  char *nextline, int *endfile, int fr
 			case(0): {strcpy(nlread.chr,nls); break;}
 			case(1): {nlread.pos = atoi(nls); break;}
 			case(2): {
-			          nlread.pairlength = atoi(nls) - nlread.pos + 1;
+			          nlread.pairlength = atoi(nls) - nlread.pos;
 				  if(overlapmode) { i=5;}
 				  break;
 			         }  
@@ -1233,7 +1234,7 @@ void readrefline(struct readinfo *refread, int *refendfile, int reffraglength, i
 			{
 			case(0): {strcpy((*refread).chr,refsplit); break;}
 			case(1): {(*refread).pos = atoi(refsplit); break;}
-			case(2): {(*refread).pairlength = atoi(refsplit) - (*refread).pos + 1; break;}
+			case(2): {(*refread).pairlength = atoi(refsplit) - (*refread).pos; break;}
 			case(5): {strcpy((*refread).strand,refsplit); break;}
 			}
 		    }

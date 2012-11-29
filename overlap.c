@@ -3,7 +3,7 @@
 void compare_lastregion(struct region *lastregion)
 {
   overlap.nseqregions++;
-  overlap.lenseqregions += (*lastregion).end - (*lastregion).start + 1;
+  overlap.lenseqregions += (*lastregion).end - (*lastregion).start; // + 1;
   //printf("%s\t%ld\t%ld\n", (*lastregion).chr,  (*lastregion).start, (*lastregion).end);
 
   int compendfile = 0;
@@ -15,7 +15,7 @@ void compare_lastregion(struct region *lastregion)
   compendfile = store_comp_location(prevcompchr);
   
 
-  while((emptychr(&compchrs) || strcmp(firstchrelem(&compchrs)->chr, (*lastregion).chr) || empty(firstchr(&compchrs)) || headchr(&compchrs).startend[1] < (*lastregion).start) && !(compendfile && emptychr(&compchrs)))
+  while((emptychr(&compchrs) || strcmp(firstchrelem(&compchrs)->chr, (*lastregion).chr) || empty(firstchr(&compchrs)) || headchr(&compchrs).startend[1] <= (*lastregion).start) && !(compendfile && emptychr(&compchrs)))
     {
       
       
@@ -39,7 +39,7 @@ void compare_lastregion(struct region *lastregion)
 	}
 
       //  ##Comp regions are earlier in chromosome
-      while(!emptychr(&compchrs) && !empty(firstchr(&compchrs)) && !(!strcmp(firstchrelem(&compchrs)->chr, (*lastregion).chr) && headchr(&compchrs).startend[1] >= (*lastregion).start)  && seen) 
+      while(!emptychr(&compchrs) && !empty(firstchr(&compchrs)) && !(!strcmp(firstchrelem(&compchrs)->chr, (*lastregion).chr) && headchr(&compchrs).startend[1] > (*lastregion).start)  && seen) 
 	{
 	  //printf("s2\n");
 	  if(overlap.print && !overlap.compprioroverlap){nearestregion(&compchrs, lastregion);}
@@ -76,8 +76,8 @@ void compare_lastregion(struct region *lastregion)
       //printf("LO:%ld%s\t%ld\t%ld\t%f\t%ld\t%d\t%f\t%f\t%s\t%ld\t%ld\n", overlap.lenoverlap, (*lastregion).chr, (*lastregion).start, (*lastregion).end, (*lastregion).count, (*lastregion).end-(*lastregion).start+1, (*lastregion).pos, (*lastregion).refcount,(*lastregion).total, firstchrelem(&compchrs)->chr, headchr(&compchrs).startend[0], headchr(&compchrs).startend[1]);
       if(overlap.print)
 	{
-	  fprintf(overreg_fp, "%s\t%ld\t%ld\t", (*lastregion).chr, (*lastregion).start, (*lastregion).end);
-	  if(!overlap.mode){ fprintf(overreg_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start+1, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
+	  fprintf(overreg_fp, "%s\t%ld\t%ld\t", (*lastregion).chr, (*lastregion).start, (*lastregion).end+1);
+	  if(!overlap.mode){ fprintf(overreg_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
 	  fprintf(overreg_fp, "%s\t%ld\t%ld\t0\n", firstchrelem(&compchrs)->chr, headchr(&compchrs).startend[0], headchr(&compchrs).startend[1]);
 	}
       if((*lastregion).end <= headchr(&compchrs).startend[1]) 
@@ -87,8 +87,8 @@ void compare_lastregion(struct region *lastregion)
 	  //printf("s3\n");
 	  if(overlap.print)
 	    {
-	      fprintf(overcomp_fp, "%s\t%ld\t%ld\t%s\t%ld\t%ld\t", firstchrelem(&compchrs)->chr, headchr(&compchrs).startend[0], headchr(&compchrs).startend[1], (*lastregion).chr, (*lastregion).start, (*lastregion).end);
-	      if(!overlap.mode){ fprintf(overcomp_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start+1, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
+	      fprintf(overcomp_fp, "%s\t%ld\t%ld\t%s\t%ld\t%ld\t", firstchrelem(&compchrs)->chr, headchr(&compchrs).startend[0], headchr(&compchrs).startend[1], (*lastregion).chr, (*lastregion).start, (*lastregion).end+1);
+	      if(!overlap.mode){ fprintf(overcomp_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
 	      fprintf(overcomp_fp, "0\n");
 		
 	    }
@@ -112,14 +112,14 @@ void compare_lastregion(struct region *lastregion)
 	{
 	  if(strcmp(prev.compchr, (*lastregion).chr) || (headchr(&compchrs).startend[0] - (*lastregion).end) <= ((*lastregion).start - prev.compend))
 	    { 
-	      fprintf(overreg_fp, "%s\t%ld\t%ld\t", (*lastregion).chr, (*lastregion).start, (*lastregion).end);
-	      if(!overlap.mode){ fprintf(overreg_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start+1, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
+	      fprintf(overreg_fp, "%s\t%ld\t%ld\t", (*lastregion).chr, (*lastregion).start, (*lastregion).end+1);
+	      if(!overlap.mode){ fprintf(overreg_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
 	      fprintf(overreg_fp, "%s\t%ld\t%ld\t%ld\n", firstchrelem(&compchrs)->chr, headchr(&compchrs).startend[0], headchr(&compchrs).startend[1], headchr(&compchrs).startend[0] - (*lastregion).end);
 	    }
 	  else
 	    {
-	      fprintf(overreg_fp, "%s\t%ld\t%ld\t", (*lastregion).chr, (*lastregion).start, (*lastregion).end);
-	      if(!overlap.mode){ fprintf(overreg_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start+1, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
+	      fprintf(overreg_fp, "%s\t%ld\t%ld\t", (*lastregion).chr, (*lastregion).start, (*lastregion).end+1);
+	      if(!overlap.mode){ fprintf(overreg_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
 	      fprintf(overreg_fp, "%s\t%ld\t%ld\t%ld\n", prev.compchr, prev.compstart, prev.compend, (*lastregion).start - prev.compend);
 	    }
 	}
@@ -127,14 +127,14 @@ void compare_lastregion(struct region *lastregion)
 	{
 	  if(!strcmp(prev.compchr, (*lastregion).chr))
 	    {
-	      fprintf(overreg_fp, "%s\t%ld\t%ld\t", (*lastregion).chr, (*lastregion).start, (*lastregion).end);
-	      if(!overlap.mode){ fprintf(overreg_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start+1, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
+	      fprintf(overreg_fp, "%s\t%ld\t%ld\t", (*lastregion).chr, (*lastregion).start, (*lastregion).end+1);
+	      if(!overlap.mode){ fprintf(overreg_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
 	      fprintf(overreg_fp, "%s\t%ld\t%ld\t%ld\n", prev.compchr, prev.compstart, prev.compend, (*lastregion).start - prev.compend);
 	    }
 	  else
 	    { 
-	      fprintf(overreg_fp, "%s\t%ld\t%ld\t", (*lastregion).chr, (*lastregion).start, (*lastregion).end);
-	      if(!overlap.mode){ fprintf(overreg_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start+1, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
+	      fprintf(overreg_fp, "%s\t%ld\t%ld\t", (*lastregion).chr, (*lastregion).start, (*lastregion).end+1);
+	      if(!overlap.mode){ fprintf(overreg_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
 	      fprintf(overreg_fp, "NF\tNA\tNA\tNA\n");
 	    }
 	}
@@ -180,7 +180,7 @@ int store_comp_location(char prevcompchr[50])
 	    case(1): compstart = atoi(compsplit); break;
 	    case(2): 
 	      {
-		overlap.lencompregions += atoi(compsplit) - compstart + 1;
+		overlap.lencompregions += atoi(compsplit) - compstart;// + 1;
 		//push(compstart, atoi(compsplit), compresults[compchrnum]); break;
 		pushchr(compstart, atoi(compsplit), 1, &compchrs);
 	      }
@@ -214,14 +214,14 @@ void nearestregion(struct chrstack *cstk, struct region *lastregion)
     {
       if(strcmp(prev.last_but_1_region.chr, firstchrelem(cstk)->chr) || ((*lastregion).start - headchr(&compchrs).startend[1]) <= (headchr(&compchrs).startend[0] - prev.last_but_1_region.end))
 	{
-	  fprintf(overcomp_fp, "%s\t%ld\t%ld\t%s\t%ld\t%ld\t", firstchrelem(&compchrs)->chr, headchr(&compchrs).startend[0], headchr(&compchrs).startend[1], (*lastregion).chr, (*lastregion).start, (*lastregion).end);
-	  if(!overlap.mode){ fprintf(overcomp_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start+1, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
+	  fprintf(overcomp_fp, "%s\t%ld\t%ld\t%s\t%ld\t%ld\t", firstchrelem(&compchrs)->chr, headchr(&compchrs).startend[0], headchr(&compchrs).startend[1], (*lastregion).chr, (*lastregion).start, (*lastregion).end+1);
+	  if(!overlap.mode){ fprintf(overcomp_fp, "%f\t%ld\t%d\t%f\t%f\t", (*lastregion).count, (*lastregion).end-(*lastregion).start, (*lastregion).pos, (*lastregion).refcount,(*lastregion).print_total); }
 	  fprintf(overcomp_fp, "%ld\n", (*lastregion).start - headchr(&compchrs).startend[1]);
 	}
       else
 	{
-	  fprintf(overcomp_fp, "%s\t%ld\t%ld\t%s\t%ld\t%ld\t", firstchrelem(&compchrs)->chr, headchr(&compchrs).startend[0], headchr(&compchrs).startend[1], prev.last_but_1_region.chr, prev.last_but_1_region.start, prev.last_but_1_region.end);
-	  if(!overlap.mode){ fprintf(overcomp_fp, "%f\t%ld\t%d\t%f\t%f\t", prev.last_but_1_region.count, prev.last_but_1_region.end-prev.last_but_1_region.start+1, prev.last_but_1_region.pos, prev.last_but_1_region.refcount, prev.last_but_1_region.print_total); }
+	  fprintf(overcomp_fp, "%s\t%ld\t%ld\t%s\t%ld\t%ld\t", firstchrelem(&compchrs)->chr, headchr(&compchrs).startend[0], headchr(&compchrs).startend[1], prev.last_but_1_region.chr, prev.last_but_1_region.start, prev.last_but_1_region.end+1);
+	  if(!overlap.mode){ fprintf(overcomp_fp, "%f\t%ld\t%d\t%f\t%f\t", prev.last_but_1_region.count, prev.last_but_1_region.end-prev.last_but_1_region.start, prev.last_but_1_region.pos, prev.last_but_1_region.refcount, prev.last_but_1_region.print_total); }
 	  fprintf(overcomp_fp, "%ld\n", headchr(&compchrs).startend[0] - prev.last_but_1_region.end);
 	}
     }
@@ -230,8 +230,8 @@ void nearestregion(struct chrstack *cstk, struct region *lastregion)
     {
       if(!strcmp(prev.last_but_1_region.chr, firstchrelem(cstk)->chr))
 	{
-	  fprintf(overcomp_fp, "%s\t%ld\t%ld\t%s\t%ld\t%ld\t", firstchrelem(&compchrs)->chr, headchr(&compchrs).startend[0], headchr(&compchrs).startend[1], prev.last_but_1_region.chr, prev.last_but_1_region.start, prev.last_but_1_region.end);
-	  if(!overlap.mode){ fprintf(overcomp_fp, "%f\t%ld\t%d\t%f\t%f\t", prev.last_but_1_region.count, prev.last_but_1_region.end-prev.last_but_1_region.start+1, prev.last_but_1_region.pos, prev.last_but_1_region.refcount, prev.last_but_1_region.print_total); }
+	  fprintf(overcomp_fp, "%s\t%ld\t%ld\t%s\t%ld\t%ld\t", firstchrelem(&compchrs)->chr, headchr(&compchrs).startend[0], headchr(&compchrs).startend[1], prev.last_but_1_region.chr, prev.last_but_1_region.start, prev.last_but_1_region.end+1);
+	  if(!overlap.mode){ fprintf(overcomp_fp, "%f\t%ld\t%d\t%f\t%f\t", prev.last_but_1_region.count, prev.last_but_1_region.end-prev.last_but_1_region.start, prev.last_but_1_region.pos, prev.last_but_1_region.refcount, prev.last_but_1_region.print_total); }
 	  fprintf(overcomp_fp, "%ld\n", headchr(&compchrs).startend[0] - prev.last_but_1_region.end);
 	}
       else
