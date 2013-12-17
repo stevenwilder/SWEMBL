@@ -86,6 +86,8 @@ int main(int argc, char **argv)
 
   if(!par.comp)
     { print_output_header(par, infile, reffile); }
+
+  if(par.comp ==2) { par.comp == 0; }
   
   int nsavedrefchrs = 0;
   ///struct savedreflengths   savedrefs[par.maxsavedrefchrs];

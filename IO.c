@@ -43,7 +43,7 @@ struct param get_parameters(char infile[1000], char outfile[1000], char reffile[
   int c;
   int index;
  
-  while((c = getopt (argc, argv, "i:o:r:w:a:b:p:P:m:t:j:l:f:q:c:d:s:x:G:n:N:K:R:u:D:AOCBEMSFhezvygTV")) != -1)
+  while((c = getopt (argc, argv, "i:o:r:w:a:b:p:P:m:t:j:l:f:q:c:d:s:x:G:n:N:K:R:u:D:AOCBEMSFHhezvygTV")) != -1)
    switch(c)
      {
      case 'i': strcpy(infile,optarg); break;
@@ -90,6 +90,7 @@ struct param get_parameters(char infile[1000], char outfile[1000], char reffile[
      case 'T': par.bootstrap = 1; break;
      case 'D': rseed = atoi(optarg); break;
      case 'v': printf("SWEMBL version 4.0\n"); exit (0);
+     case 'H': par.comp = 2; break;
      case 'h': print_help();
      case '?': 
        if (optopt == 'i')
@@ -217,7 +218,7 @@ struct param get_parameters(char infile[1000], char outfile[1000], char reffile[
 
 void print_help()
 {
-  printf("\nProgram to call peaks from genomic and other data.\n\nMandatory command line options:\n-i Path to input file\n\nOptional command line options taking no arguments:\n-e Paired end reads\n-V New peak version, extending peaks only as far as evidence permits\n-M MAQ format [default]\n-B BED format\n-E ELAND format\n-S SAM format\n-F BAM format\n-C count format\n-z File is gzipped\n-O Create files of nearest features with comparison file (-a)\n-g Overlap mode for two bed files\n-T Bootstrap input\n-y Quiet mode, only print warnings\n-A Append output file\n-v Print version number and exit\n-h This help page\n\nOptional command line options taking arguments [defaults in square brackets]:\n-o Path to output file [Input file.'.SWEMBL.3.6.txt']\n-r Path to reference (Input) file\n-w Path to wiggle track file\n-a Path to comparison file\n-s Path to coordinate file\n-G Number of rows in coordinate file [200]\n-b Penalty applied to read count [0]\n-p Penalty applied to a gap of one base pair [0.01]\n-l Read length [calculated from first read in file for BED and MAQ formats]\n-f Fragment length for extending fragments [Read length]\n-d Gap at which penalty per base pair increases [70]\n-P Penalty per base pair applied after gap specifed above [0.02]\n-t Threshold value for number of sample reads starting at one base pair [5]\n-j Threshold value for number of reference reads starting at one base pair [0 = -t value]\n-q Mapping quality filter value (MAQ only) [0]\n-m Minimum read count in a peak [8]\n-c Minimum score for a peak [0]\n-n Maximum score threshold [0 = infinite]\n-N Number of input reads [0]\n-R Relative background (depends on -N) [0]\n-K Number of reference reads [0]\n-x Penalty factor for reference reads [1]\n-u Proportion of reads sampled [1]\n-D Random seed (only used for sampling and bootstrapping) [time]\n\n"); exit(1);
+  printf("\nProgram to call peaks from genomic and other data.\n\nMandatory command line options:\n-i Path to input file\n\nOptional command line options taking no arguments:\n-e Paired end reads\n-V New peak version, extending peaks only as far as evidence permits\n-M MAQ format [default]\n-B BED format\n-E ELAND format\n-S SAM format\n-F BAM format\n-C count format\n-z File is gzipped\n-O Create files of nearest features with comparison file (-a)\n-g Overlap mode for two bed files\n-T Bootstrap input\n-y Quiet mode, only print warnings\n-A Append output file\n-H Suppress headers\n-v Print version number and exit\n-h This help page\n\nOptional command line options taking arguments [defaults in square brackets]:\n-o Path to output file [Input file.'.SWEMBL.4.0.txt']\n-r Path to reference (Input) file\n-w Path to wiggle track file\n-a Path to comparison file\n-s Path to coordinate file\n-G Number of rows in coordinate file [200]\n-b Penalty applied to read count [0]\n-p Penalty applied to a gap of one base pair [0.01]\n-l Read length [calculated from first read in file for BED and MAQ formats]\n-f Fragment length for extending fragments [Read length]\n-d Gap at which penalty per base pair increases [70]\n-P Penalty per base pair applied after gap specifed above [0.02]\n-t Threshold value for number of sample reads starting at one base pair [5]\n-j Threshold value for number of reference reads starting at one base pair [0 = -t value]\n-q Mapping quality filter value (MAQ, SAM or BAM) [0]\n-m Minimum read count in a peak [8]\n-c Minimum score for a peak [0]\n-n Maximum score threshold [0 = infinite]\n-N Number of input reads [0]\n-R Relative background (depends on -N) [0]\n-K Number of reference reads [0]\n-x Penalty factor for reference reads [1]\n-u Proportion of reads sampled [1]\n-D Random seed (only used for sampling and bootstrapping) [time]\n\n"); exit(1);
 }
 
 
@@ -294,7 +295,7 @@ void open_files(int ref, int wig, int comp, char *infile, char *outfile, char *r
       exit(1);
     }
 
-  if(comp && (comp_fp= fopen(compfile, "r"))==NULL)
+  if(comp == 1 && (comp_fp= fopen(compfile, "r"))==NULL)
     {
       printf("\n\n*** Error opening %s ***\n", compfile);
       exit(1);
